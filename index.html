@@ -394,6 +394,12 @@ textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); ou
   gap: .6rem;
   align-items: end;
 }
+.budget-form .btn {
+  width: 100%;
+  justify-content: center;
+  padding: .5rem .6rem;
+  box-sizing: border-box;
+}
 .budget-summary {
   display: flex;
   flex-direction: column;
@@ -551,7 +557,7 @@ body.raw-mode #budget-panel {
         <div class="field"><label for="budget-model">Modèle</label><select id="budget-model"></select></div>
         <div class="field"><label for="budget-in-tokens">Tokens entrée</label><input type="number" id="budget-in-tokens" min="0" value="0"></div>
         <div class="field"><label for="budget-out-tokens">Tokens sortie</label><input type="number" id="budget-out-tokens" min="0" value="0"></div>
-        <button type="submit" class="btn primary">Ajouter</button>
+        <div class="field"><label class="field-spacer" aria-hidden="true">&nbsp;</label><button type="submit" class="btn primary">Ajouter</button></div>
       </form>
       <div id="budget-entries"></div>
     </div>
