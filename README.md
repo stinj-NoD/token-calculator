@@ -1,6 +1,6 @@
 # Calculateur de tokens IA — 2026
 
-**Version actuelle : 1.1.0** — voir [`CHANGELOG.md`](CHANGELOG.md) pour l'historique complet des versions.
+**Version actuelle : 1.2.0** — voir [`CHANGELOG.md`](CHANGELOG.md) pour l'historique complet des versions.
 
 Application web mono-fichier pour estimer le nombre de tokens et le coût d'un texte sur les principaux modèles IA 2026 : Claude / Claude Code, ChatGPT / Codex, Gemini, GitHub Copilot, xAI Grok, Moonshot AI Kimi, Mistral AI et DeepSeek.
 
@@ -36,8 +36,10 @@ Puis commit + push — la page publiée reflète automatiquement la dernière ve
 Ce projet n'a pas de build ni de `package.json` : le numéro de version est une simple constante `APP_VERSION` dans `index.html`, suivant un schéma [SemVer](https://semver.org/lang/fr/) simplifié documenté en tête de [`CHANGELOG.md`](CHANGELOG.md).
 
 1. Mettre à jour `const APP_VERSION = "X.Y.Z";` dans `index.html`.
-2. Ajouter une entrée correspondante dans `CHANGELOG.md`.
-3. Committer les deux changements ensemble, puis taguer le commit : `git tag -a vX.Y.Z -m "..."` et `git push --tags`.
+2. Mettre à jour `const CACHE_NAME = "tokencalc-vX.Y.Z";` dans `sw.js` (sinon les utilisateurs hors-ligne restent bloqués sur l'ancien cache du service worker).
+3. Mettre à jour la mention « Version actuelle » en tête de ce `README.md`.
+4. Ajouter une entrée correspondante dans `CHANGELOG.md`.
+5. Committer tous ces changements ensemble, puis taguer le commit : `git tag -a vX.Y.Z -m "..."` et `git push --tags`.
 
 ## Licence
 
