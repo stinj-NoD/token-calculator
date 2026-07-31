@@ -11,10 +11,10 @@
       "efforts": ["low", "medium", "high", "max"],
       "effortLabel": "Niveau d'effort",
       "models": [
-        { "id": "opus-5", "name": "Opus 5", "priceIn": 5, "priceOut": 25, "proxyFactor": 1.03 },
-        { "id": "sonnet-5", "name": "Sonnet 5", "priceIn": 2, "priceOut": 10, "priceInAfter": 3, "priceOutAfter": 15, "priceChangeDate": "2026-08-31", "proxyFactor": 1.03 },
-        { "id": "haiku-4-5", "name": "Haiku 4.5", "priceIn": 1, "priceOut": 5, "proxyFactor": 1.05 },
-        { "id": "fable-5", "name": "Fable 5", "priceIn": 10, "priceOut": 50, "proxyFactor": 1.03 }
+        { "id": "opus-5", "name": "Opus 5", "priceIn": 5, "priceOut": 25, "proxyFactor": 1.03, "sourceUrl": "https://www.anthropic.com/pricing", "verifiedOn": "2026-07-31" },
+        { "id": "sonnet-5", "name": "Sonnet 5", "priceIn": 2, "priceOut": 10, "priceInAfter": 3, "priceOutAfter": 15, "priceChangeDate": "2026-08-31", "proxyFactor": 1.03, "sourceUrl": "https://www.anthropic.com/pricing", "verifiedOn": "2026-07-31" },
+        { "id": "haiku-4-5", "name": "Haiku 4.5", "priceIn": 1, "priceOut": 5, "proxyFactor": 1.05, "sourceUrl": "https://www.anthropic.com/pricing", "verifiedOn": "2026-07-31" },
+        { "id": "fable-5", "name": "Fable 5", "priceIn": 10, "priceOut": 50, "proxyFactor": 1.03, "sourceUrl": "https://www.anthropic.com/pricing", "verifiedOn": "2026-07-31" }
       ]
     },
     "chatgpt": {
@@ -24,10 +24,10 @@
       "efforts": ["minimal", "low", "medium", "high"],
       "effortLabel": "Niveau d'effort",
       "models": [
-        { "id": "gpt-5-6-sol", "name": "GPT-5.6 Sol (flagship)", "priceIn": 5, "priceOut": 30 },
-        { "id": "gpt-5-6-terra", "name": "GPT-5.6 Terra (équilibré)", "priceIn": 2.5, "priceOut": 15 },
-        { "id": "gpt-5-6-luna", "name": "GPT-5.6 Luna (économique)", "priceIn": 1, "priceOut": 6 },
-        { "id": "gpt-5-5", "name": "GPT-5.5 (génération précédente)", "priceIn": null, "priceOut": null }
+        { "id": "gpt-5-6-sol", "name": "GPT-5.6 Sol (flagship)", "priceIn": 5, "priceOut": 30, "sourceUrl": "https://openai.com/api/pricing/", "verifiedOn": "2026-07-31" },
+        { "id": "gpt-5-6-terra", "name": "GPT-5.6 Terra (équilibré)", "priceIn": 2.5, "priceOut": 15, "sourceUrl": "https://openai.com/api/pricing/", "verifiedOn": "2026-07-31" },
+        { "id": "gpt-5-6-luna", "name": "GPT-5.6 Luna (économique)", "priceIn": 1, "priceOut": 6, "sourceUrl": "https://openai.com/api/pricing/", "verifiedOn": "2026-07-31" },
+        { "id": "gpt-5-5", "name": "GPT-5.5 (génération précédente)", "priceIn": null, "priceOut": null, "sourceUrl": "https://openai.com/api/pricing/", "verifiedOn": "2026-07-31" }
       ]
     },
     "gemini": {
@@ -38,11 +38,11 @@
       "efforts": ["low", "medium", "high", "max"],
       "effortLabel": "Budget de réflexion",
       "models": [
-        { "id": "gemini-3-6-flash", "name": "Gemini 3.6 Flash", "priceIn": 1.5, "priceOut": 7.5, "proxyFactor": 0.97 },
-        { "id": "gemini-3-5-flash", "name": "Gemini 3.5 Flash", "priceIn": 1.5, "priceOut": 9.0, "proxyFactor": 0.97 },
-        { "id": "gemini-3-flash", "name": "Gemini 3 Flash", "priceIn": 0.5, "priceOut": 3.0, "proxyFactor": 0.98 },
-        { "id": "gemini-3-1-flash-lite", "name": "Gemini 3.1 Flash-Lite", "priceIn": 0.25, "priceOut": 1.5, "proxyFactor": 1.0 },
-        { "id": "gemini-3-1-pro", "name": "Gemini 3.1 Pro", "priceIn": 3.5, "priceOut": 16, "estimated": true, "proxyFactor": 0.95 }
+        { "id": "gemini-3-6-flash", "name": "Gemini 3.6 Flash", "priceIn": 1.5, "priceOut": 7.5, "proxyFactor": 0.97, "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing", "verifiedOn": "2026-07-31" },
+        { "id": "gemini-3-5-flash", "name": "Gemini 3.5 Flash", "priceIn": 1.5, "priceOut": 9.0, "proxyFactor": 0.97, "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing", "verifiedOn": "2026-07-31" },
+        { "id": "gemini-3-flash", "name": "Gemini 3 Flash", "priceIn": 0.5, "priceOut": 3.0, "proxyFactor": 0.98, "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing", "verifiedOn": "2026-07-31" },
+        { "id": "gemini-3-1-flash-lite", "name": "Gemini 3.1 Flash-Lite", "priceIn": 0.25, "priceOut": 1.5, "proxyFactor": 1.0, "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing", "verifiedOn": "2026-07-31" },
+        { "id": "gemini-3-1-pro", "name": "Gemini 3.1 Pro", "priceIn": 3.5, "priceOut": 16, "estimated": true, "proxyFactor": 0.95, "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing", "verifiedOn": "2026-07-31" }
       ]
     },
     "copilot": {
@@ -52,10 +52,10 @@
       "efforts": ["low", "medium", "high"],
       "effortLabel": "Niveau d'effort",
       "models": [
-        { "id": "gpt-5-3-codex", "name": "GPT-5.3-Codex (défaut)", "priceIn": null, "priceOut": null, "tokenizer": "exact" },
-        { "id": "opus-5-copilot", "name": "Claude Opus 5", "priceIn": 5, "priceOut": 25, "tokenizer": "proxy" },
-        { "id": "grok-4-5", "name": "Grok 4.5", "priceIn": null, "priceOut": null, "tokenizer": "proxy" },
-        { "id": "kimi-k2-7", "name": "Kimi K2.7", "priceIn": null, "priceOut": null, "tokenizer": "proxy" }
+        { "id": "gpt-5-3-codex", "name": "GPT-5.3-Codex (défaut)", "priceIn": null, "priceOut": null, "tokenizer": "exact", "sourceUrl": "https://docs.github.com/en/copilot/about-github-copilot/plans-for-github-copilot", "verifiedOn": "2026-07-31" },
+        { "id": "opus-5-copilot", "name": "Claude Opus 5", "priceIn": 5, "priceOut": 25, "tokenizer": "proxy", "sourceUrl": "https://docs.github.com/en/copilot/about-github-copilot/plans-for-github-copilot", "verifiedOn": "2026-07-31" },
+        { "id": "grok-4-5", "name": "Grok 4.5", "priceIn": null, "priceOut": null, "tokenizer": "proxy", "sourceUrl": "https://docs.github.com/en/copilot/about-github-copilot/plans-for-github-copilot", "verifiedOn": "2026-07-31" },
+        { "id": "kimi-k2-7", "name": "Kimi K2.7", "priceIn": null, "priceOut": null, "tokenizer": "proxy", "sourceUrl": "https://docs.github.com/en/copilot/about-github-copilot/plans-for-github-copilot", "verifiedOn": "2026-07-31" }
       ]
     },
     "grok": {
@@ -66,7 +66,7 @@
       "efforts": ["standard"],
       "effortLabel": "Mode",
       "models": [
-        { "id": "grok-4-5", "name": "Grok 4.5", "priceIn": 2, "priceOut": 6 }
+        { "id": "grok-4-5", "name": "Grok 4.5", "priceIn": 2, "priceOut": 6, "sourceUrl": "https://x.ai/api", "verifiedOn": "2026-07-31" }
       ]
     },
     "kimi": {
@@ -77,7 +77,7 @@
       "efforts": ["standard"],
       "effortLabel": "Mode",
       "models": [
-        { "id": "kimi-k2-7-code", "name": "Kimi K2.7 Code", "priceIn": 0.95, "priceOut": 4.0 }
+        { "id": "kimi-k2-7-code", "name": "Kimi K2.7 Code", "priceIn": 0.95, "priceOut": 4.0, "sourceUrl": "https://platform.moonshot.ai/docs/pricing", "verifiedOn": "2026-07-31" }
       ]
     },
     "mistral": {
@@ -88,8 +88,8 @@
       "efforts": ["low", "medium", "high"],
       "effortLabel": "Niveau d'effort",
       "models": [
-        { "id": "mistral-large-3", "name": "Mistral Large 3", "priceIn": 2, "priceOut": 6, "estimated": true, "proxyFactor": 1.12 },
-        { "id": "mistral-medium-3-5", "name": "Mistral Medium 3.5", "priceIn": 1.5, "priceOut": 7.5, "estimated": true, "proxyFactor": 1.08 }
+        { "id": "mistral-large-3", "name": "Mistral Large 3", "priceIn": 2, "priceOut": 6, "estimated": true, "proxyFactor": 1.12, "sourceUrl": "https://mistral.ai/products/la-plateforme#pricing", "verifiedOn": "2026-07-31" },
+        { "id": "mistral-medium-3-5", "name": "Mistral Medium 3.5", "priceIn": 1.5, "priceOut": 7.5, "estimated": true, "proxyFactor": 1.08, "sourceUrl": "https://mistral.ai/products/la-plateforme#pricing", "verifiedOn": "2026-07-31" }
       ]
     },
     "deepseek": {
@@ -100,8 +100,8 @@
       "efforts": ["standard"],
       "effortLabel": "Mode",
       "models": [
-        { "id": "deepseek-v4-pro", "name": "DeepSeek V4-Pro", "priceIn": 0.435, "priceOut": 0.87 },
-        { "id": "deepseek-v4-flash", "name": "DeepSeek V4-Flash", "priceIn": 0.14, "priceOut": 0.28 }
+        { "id": "deepseek-v4-pro", "name": "DeepSeek V4-Pro", "priceIn": 0.435, "priceOut": 0.87, "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing", "verifiedOn": "2026-07-31" },
+        { "id": "deepseek-v4-flash", "name": "DeepSeek V4-Flash", "priceIn": 0.14, "priceOut": 0.28, "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing", "verifiedOn": "2026-07-31" }
       ]
     }
   }

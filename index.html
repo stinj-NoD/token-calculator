@@ -32,6 +32,8 @@ body {
   --badge-exact-fg: #4ade80;
   --badge-proxy-bg: #3a2f16;
   --badge-proxy-fg: #fbbf24;
+  --badge-stale-bg: #3a1616;
+  --badge-stale-fg: #f87171;
   --input-bg: #12141c;
   --danger: #f87171;
 }
@@ -48,6 +50,8 @@ body {
   --badge-exact-fg: #16803c;
   --badge-proxy-bg: #fdf0dc;
   --badge-proxy-fg: #92650b;
+  --badge-stale-bg: #fbe2e2;
+  --badge-stale-fg: #b91c1c;
   --input-bg: #f0f1f6;
   --danger: #dc2626;
 }
@@ -65,7 +69,11 @@ header {
 }
 header .header-left { display: flex; flex-direction: column; gap: .2rem; }
 header h1 { font-size: 1.25rem; font-weight: 600; }
+header .header-meta { display: flex; align-items: center; gap: .35rem; }
 header .last-updated { font-size: .78rem; color: var(--fg-muted); }
+header .header-meta-sep { font-size: .78rem; color: var(--fg-muted); }
+header .app-version { font-size: .78rem; color: var(--fg-muted); text-decoration: none; }
+header .app-version:hover { color: var(--accent); text-decoration: underline; }
 header .header-right { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
 
 main {
@@ -86,6 +94,11 @@ footer {
   display: flex;
   flex-direction: column;
   gap: .3rem;
+}
+.footer-note-detail {
+  cursor: help;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
 }
 
 /* ===== Status pill ===== */
@@ -264,6 +277,38 @@ textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); ou
 }
 .badge.exact { background: var(--badge-exact-bg); color: var(--badge-exact-fg); }
 .badge.proxy { background: var(--badge-proxy-bg); color: var(--badge-proxy-fg); }
+.badge.fresh { background: var(--badge-exact-bg); color: var(--badge-exact-fg); }
+.badge.warning { background: var(--badge-proxy-bg); color: var(--badge-proxy-fg); }
+.badge.stale { background: var(--badge-stale-bg); color: var(--badge-stale-fg); }
+
+.source-link { font-size: .78rem; color: var(--fg-muted); text-decoration: none; white-space: nowrap; }
+.source-link:hover { color: var(--accent); text-decoration: underline; }
+
+.price-history {
+  margin-top: .9rem;
+  border-top: 1px solid var(--border);
+  padding-top: .75rem;
+}
+.price-history summary {
+  cursor: pointer;
+  font-size: .82rem;
+  color: var(--fg-muted);
+  font-weight: 500;
+}
+.price-history summary:hover { color: var(--fg); }
+.price-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: .6rem;
+  font-size: .8rem;
+}
+.price-history-table th, .price-history-table td {
+  text-align: left;
+  padding: .4rem .5rem;
+  border-bottom: 1px solid var(--border);
+}
+.price-history-table th { color: var(--fg-muted); font-weight: 600; font-size: .7rem; text-transform: uppercase; }
+.price-history-empty { font-size: .8rem; color: var(--fg-muted); margin-top: .6rem; }
 
 .card-controls {
   display: grid;
@@ -483,7 +528,11 @@ body.raw-mode #budget-panel {
 <header>
   <div class="header-left">
     <h1>Calculateur de tokens IA — modèles 2026</h1>
-    <span class="last-updated" id="last-updated-text"></span>
+    <div class="header-meta">
+      <span class="last-updated" id="last-updated-text"></span>
+      <span class="header-meta-sep">·</span>
+      <a class="app-version" id="app-version" href="https://github.com/stinj-NoD/token-calculator/blob/main/CHANGELOG.md" target="_blank" rel="noopener"></a>
+    </div>
   </div>
   <div class="header-right">
     <span id="tokenizer-status" class="status-pill">
@@ -617,10 +666,14 @@ body.raw-mode #budget-panel {
 </div>
 
 <footer>
-  <span id="data-footer-note">Tous les chiffres (tokens, coûts) sont des estimations à but comparatif. Seul le comptage ChatGPT/Codex utilise le tokenizer OpenAI réel (o200k_base) ; les autres fournisseurs n'exposent pas de tokenizer public et sont approximés via ce même tokenizer comme proxy. Le mode "résultat brut" (paramètre ?raw=1) n'est pas une vraie API serveur — c'est une page statique qui affiche un bloc JSON à lire via un navigateur automatisé (Playwright/Puppeteer).</span>
+  <span id="data-footer-note">Tous les chiffres (tokens, coûts) sont des estimations à but comparatif — voir le badge de chaque carte pour le détail par fournisseur. <span class="footer-note-detail" tabindex="0" title="Seul le comptage ChatGPT/Codex utilise le tokenizer OpenAI réel (o200k_base) ; les autres fournisseurs n'exposent pas de tokenizer public et sont approximés via ce même tokenizer comme proxy. Le mode « résultat brut » (paramètre ?raw=1) n'est pas une vraie API serveur — c'est une page statique qui affiche un bloc JSON à lire via un navigateur automatisé (Playwright/Puppeteer).">Détails ⓘ</span></span>
 </footer>
 
 <script type="module">
+// ===== Version de l'application (SemVer manuel — voir CHANGELOG.md) =====
+const APP_VERSION = "1.1.0";
+document.getElementById("app-version").textContent = `v${APP_VERSION}`;
+
 // ===== Effort/reasoning output multipliers & providers state (populated from data/providers.json) =====
 let EFFORT_MULTIPLIERS = null;
 let EFFORT_LABELS = null;
@@ -640,67 +693,67 @@ const FALLBACK_DATA = {
       label: "Claude / Claude Code", category: "generalist", tokenizerMode: "proxy", proxyFactor: 1.05,
       efforts: ["low", "medium", "high", "max"], effortLabel: "Niveau d'effort",
       models: [
-        { id: "opus-5", name: "Opus 5", priceIn: 5, priceOut: 25, proxyFactor: 1.03 },
-        { id: "sonnet-5", name: "Sonnet 5", priceIn: 2, priceOut: 10, priceInAfter: 3, priceOutAfter: 15, priceChangeDate: "2026-08-31", proxyFactor: 1.03 },
-        { id: "haiku-4-5", name: "Haiku 4.5", priceIn: 1, priceOut: 5, proxyFactor: 1.05 },
-        { id: "fable-5", name: "Fable 5", priceIn: 10, priceOut: 50, proxyFactor: 1.03 },
+        { id: "opus-5", name: "Opus 5", priceIn: 5, priceOut: 25, proxyFactor: 1.03, sourceUrl: "https://www.anthropic.com/pricing", verifiedOn: "2026-07-31" },
+        { id: "sonnet-5", name: "Sonnet 5", priceIn: 2, priceOut: 10, priceInAfter: 3, priceOutAfter: 15, priceChangeDate: "2026-08-31", proxyFactor: 1.03, sourceUrl: "https://www.anthropic.com/pricing", verifiedOn: "2026-07-31" },
+        { id: "haiku-4-5", name: "Haiku 4.5", priceIn: 1, priceOut: 5, proxyFactor: 1.05, sourceUrl: "https://www.anthropic.com/pricing", verifiedOn: "2026-07-31" },
+        { id: "fable-5", name: "Fable 5", priceIn: 10, priceOut: 50, proxyFactor: 1.03, sourceUrl: "https://www.anthropic.com/pricing", verifiedOn: "2026-07-31" },
       ],
     },
     chatgpt: {
       label: "ChatGPT / Codex", category: "generalist", tokenizerMode: "exact",
       efforts: ["minimal", "low", "medium", "high"], effortLabel: "Niveau d'effort",
       models: [
-        { id: "gpt-5-6-sol", name: "GPT-5.6 Sol (flagship)", priceIn: 5, priceOut: 30 },
-        { id: "gpt-5-6-terra", name: "GPT-5.6 Terra (équilibré)", priceIn: 2.5, priceOut: 15 },
-        { id: "gpt-5-6-luna", name: "GPT-5.6 Luna (économique)", priceIn: 1, priceOut: 6 },
-        { id: "gpt-5-5", name: "GPT-5.5 (génération précédente)", priceIn: null, priceOut: null },
+        { id: "gpt-5-6-sol", name: "GPT-5.6 Sol (flagship)", priceIn: 5, priceOut: 30, sourceUrl: "https://openai.com/api/pricing/", verifiedOn: "2026-07-31" },
+        { id: "gpt-5-6-terra", name: "GPT-5.6 Terra (équilibré)", priceIn: 2.5, priceOut: 15, sourceUrl: "https://openai.com/api/pricing/", verifiedOn: "2026-07-31" },
+        { id: "gpt-5-6-luna", name: "GPT-5.6 Luna (économique)", priceIn: 1, priceOut: 6, sourceUrl: "https://openai.com/api/pricing/", verifiedOn: "2026-07-31" },
+        { id: "gpt-5-5", name: "GPT-5.5 (génération précédente)", priceIn: null, priceOut: null, sourceUrl: "https://openai.com/api/pricing/", verifiedOn: "2026-07-31" },
       ],
     },
     gemini: {
       label: "Gemini", category: "generalist", tokenizerMode: "proxy", proxyFactor: 1.0,
       efforts: ["low", "medium", "high", "max"], effortLabel: "Budget de réflexion",
       models: [
-        { id: "gemini-3-6-flash", name: "Gemini 3.6 Flash", priceIn: 1.5, priceOut: 7.5, proxyFactor: 0.97 },
-        { id: "gemini-3-5-flash", name: "Gemini 3.5 Flash", priceIn: 1.5, priceOut: 9.0, proxyFactor: 0.97 },
-        { id: "gemini-3-flash", name: "Gemini 3 Flash", priceIn: 0.5, priceOut: 3.0, proxyFactor: 0.98 },
-        { id: "gemini-3-1-flash-lite", name: "Gemini 3.1 Flash-Lite", priceIn: 0.25, priceOut: 1.5, proxyFactor: 1.0 },
-        { id: "gemini-3-1-pro", name: "Gemini 3.1 Pro", priceIn: 3.5, priceOut: 16, estimated: true, proxyFactor: 0.95 },
+        { id: "gemini-3-6-flash", name: "Gemini 3.6 Flash", priceIn: 1.5, priceOut: 7.5, proxyFactor: 0.97, sourceUrl: "https://ai.google.dev/gemini-api/docs/pricing", verifiedOn: "2026-07-31" },
+        { id: "gemini-3-5-flash", name: "Gemini 3.5 Flash", priceIn: 1.5, priceOut: 9.0, proxyFactor: 0.97, sourceUrl: "https://ai.google.dev/gemini-api/docs/pricing", verifiedOn: "2026-07-31" },
+        { id: "gemini-3-flash", name: "Gemini 3 Flash", priceIn: 0.5, priceOut: 3.0, proxyFactor: 0.98, sourceUrl: "https://ai.google.dev/gemini-api/docs/pricing", verifiedOn: "2026-07-31" },
+        { id: "gemini-3-1-flash-lite", name: "Gemini 3.1 Flash-Lite", priceIn: 0.25, priceOut: 1.5, proxyFactor: 1.0, sourceUrl: "https://ai.google.dev/gemini-api/docs/pricing", verifiedOn: "2026-07-31" },
+        { id: "gemini-3-1-pro", name: "Gemini 3.1 Pro", priceIn: 3.5, priceOut: 16, estimated: true, proxyFactor: 0.95, sourceUrl: "https://ai.google.dev/gemini-api/docs/pricing", verifiedOn: "2026-07-31" },
       ],
     },
     copilot: {
       label: "GitHub Copilot", category: "generalist", tokenizerMode: "mixed",
       efforts: ["low", "medium", "high"], effortLabel: "Niveau d'effort",
       models: [
-        { id: "gpt-5-3-codex", name: "GPT-5.3-Codex (défaut)", priceIn: null, priceOut: null, tokenizer: "exact" },
-        { id: "opus-5-copilot", name: "Claude Opus 5", priceIn: 5, priceOut: 25, tokenizer: "proxy" },
-        { id: "grok-4-5", name: "Grok 4.5", priceIn: null, priceOut: null, tokenizer: "proxy" },
-        { id: "kimi-k2-7", name: "Kimi K2.7", priceIn: null, priceOut: null, tokenizer: "proxy" },
+        { id: "gpt-5-3-codex", name: "GPT-5.3-Codex (défaut)", priceIn: null, priceOut: null, tokenizer: "exact", sourceUrl: "https://docs.github.com/en/copilot/about-github-copilot/plans-for-github-copilot", verifiedOn: "2026-07-31" },
+        { id: "opus-5-copilot", name: "Claude Opus 5", priceIn: 5, priceOut: 25, tokenizer: "proxy", sourceUrl: "https://docs.github.com/en/copilot/about-github-copilot/plans-for-github-copilot", verifiedOn: "2026-07-31" },
+        { id: "grok-4-5", name: "Grok 4.5", priceIn: null, priceOut: null, tokenizer: "proxy", sourceUrl: "https://docs.github.com/en/copilot/about-github-copilot/plans-for-github-copilot", verifiedOn: "2026-07-31" },
+        { id: "kimi-k2-7", name: "Kimi K2.7", priceIn: null, priceOut: null, tokenizer: "proxy", sourceUrl: "https://docs.github.com/en/copilot/about-github-copilot/plans-for-github-copilot", verifiedOn: "2026-07-31" },
       ],
     },
     grok: {
       label: "xAI Grok", category: "generalist", tokenizerMode: "proxy", proxyFactor: 1.05,
       efforts: ["standard"], effortLabel: "Mode",
-      models: [{ id: "grok-4-5", name: "Grok 4.5", priceIn: 2, priceOut: 6 }],
+      models: [{ id: "grok-4-5", name: "Grok 4.5", priceIn: 2, priceOut: 6, sourceUrl: "https://x.ai/api", verifiedOn: "2026-07-31" }],
     },
     kimi: {
       label: "Moonshot AI Kimi", category: "code", tokenizerMode: "proxy", proxyFactor: 1.05,
       efforts: ["standard"], effortLabel: "Mode",
-      models: [{ id: "kimi-k2-7-code", name: "Kimi K2.7 Code", priceIn: 0.95, priceOut: 4.0 }],
+      models: [{ id: "kimi-k2-7-code", name: "Kimi K2.7 Code", priceIn: 0.95, priceOut: 4.0, sourceUrl: "https://platform.moonshot.ai/docs/pricing", verifiedOn: "2026-07-31" }],
     },
     mistral: {
       label: "Mistral AI (Le Chat)", category: "generalist", tokenizerMode: "proxy", proxyFactor: 1.1,
       efforts: ["low", "medium", "high"], effortLabel: "Niveau d'effort",
       models: [
-        { id: "mistral-large-3", name: "Mistral Large 3", priceIn: 2, priceOut: 6, estimated: true, proxyFactor: 1.12 },
-        { id: "mistral-medium-3-5", name: "Mistral Medium 3.5", priceIn: 1.5, priceOut: 7.5, estimated: true, proxyFactor: 1.08 },
+        { id: "mistral-large-3", name: "Mistral Large 3", priceIn: 2, priceOut: 6, estimated: true, proxyFactor: 1.12, sourceUrl: "https://mistral.ai/products/la-plateforme#pricing", verifiedOn: "2026-07-31" },
+        { id: "mistral-medium-3-5", name: "Mistral Medium 3.5", priceIn: 1.5, priceOut: 7.5, estimated: true, proxyFactor: 1.08, sourceUrl: "https://mistral.ai/products/la-plateforme#pricing", verifiedOn: "2026-07-31" },
       ],
     },
     deepseek: {
       label: "DeepSeek", category: "economy", tokenizerMode: "proxy", proxyFactor: 1.05,
       efforts: ["standard"], effortLabel: "Mode",
       models: [
-        { id: "deepseek-v4-pro", name: "DeepSeek V4-Pro", priceIn: 0.435, priceOut: 0.87 },
-        { id: "deepseek-v4-flash", name: "DeepSeek V4-Flash", priceIn: 0.14, priceOut: 0.28 },
+        { id: "deepseek-v4-pro", name: "DeepSeek V4-Pro", priceIn: 0.435, priceOut: 0.87, sourceUrl: "https://api-docs.deepseek.com/quick_start/pricing", verifiedOn: "2026-07-31" },
+        { id: "deepseek-v4-flash", name: "DeepSeek V4-Flash", priceIn: 0.14, priceOut: 0.28, sourceUrl: "https://api-docs.deepseek.com/quick_start/pricing", verifiedOn: "2026-07-31" },
       ],
     },
   },
@@ -767,6 +820,64 @@ function resolvePricing(model) {
     return { priceIn: model.priceInAfter, priceOut: model.priceOutAfter };
   }
   return { priceIn: model.priceIn, priceOut: model.priceOut };
+}
+
+// ===== Fraîcheur des prix (traçabilité) =====
+const FRESHNESS_WARNING_DAYS = 30;
+const FRESHNESS_STALE_DAYS = 60;
+
+function freshnessStatus(verifiedOn) {
+  if (!verifiedOn) return null;
+  const days = Math.floor((Date.now() - new Date(verifiedOn)) / 86_400_000);
+  if (days <= FRESHNESS_WARNING_DAYS) return { level: "fresh", days };
+  if (days <= FRESHNESS_STALE_DAYS) return { level: "warning", days };
+  return { level: "stale", days };
+}
+
+// ===== Historique des prix (fetch paresseux, à la première ouverture d'un panneau) =====
+let priceHistoryCache = null;
+
+async function loadPriceHistory() {
+  if (priceHistoryCache) return priceHistoryCache;
+  try {
+    const res = await fetch("data/price-history.json");
+    priceHistoryCache = await res.json();
+  } catch (e) {
+    priceHistoryCache = {};
+  }
+  return priceHistoryCache;
+}
+
+async function loadPriceHistoryFor(providerKey) {
+  const ref = cardRefs[providerKey];
+  if (ref.priceHistoryLoaded) return;
+  ref.priceHistoryLoaded = true;
+  const provider = PROVIDERS[providerKey];
+  const model = provider.models.find((m) => m.id === ref.modelSelect.value);
+  const history = await loadPriceHistory();
+  const entries = history[model.id];
+  if (!entries || entries.length === 0) {
+    ref.priceHistoryBody.innerHTML = `<div class="price-history-empty">Historique non disponible — prix initial vérifié le ${model.verifiedOn || "date inconnue"}.</div>`;
+    return;
+  }
+  const rows = entries
+    .slice()
+    .reverse()
+    .map((entry) => `
+      <tr>
+        <td>${entry.date}</td>
+        <td>${formatUSD(entry.priceIn != null ? entry.priceIn : null)}</td>
+        <td>${formatUSD(entry.priceOut != null ? entry.priceOut : null)}</td>
+        <td>${entry.sourceUrl ? `<a class="source-link" href="${entry.sourceUrl}" target="_blank" rel="noopener">Source ↗</a>` : "—"}</td>
+      </tr>
+    `)
+    .join("");
+  ref.priceHistoryBody.innerHTML = `
+    <table class="price-history-table">
+      <thead><tr><th>Date</th><th>Prix entrée / M</th><th>Prix sortie / M</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
 }
 
 function computeCost(inputTokens, outputTokens, priceIn, priceOut) {
@@ -947,13 +1058,37 @@ function buildCard(providerKey, provider) {
   footnote.style.display = "none";
   footnote.textContent = "Estimation basée sur le tokenizer OpenAI o200k_base comme proxy, pas de tokenizer public pour ce fournisseur.";
 
+  const sourceLink = document.createElement("a");
+  sourceLink.className = "source-link";
+  sourceLink.target = "_blank";
+  sourceLink.rel = "noopener";
+  sourceLink.title = "Vérifier le prix sur la page officielle du fournisseur";
+  sourceLink.textContent = "Source ↗";
+  sourceLink.style.display = "none";
+
+  const priceHistory = document.createElement("details");
+  priceHistory.className = "price-history";
+  const priceHistorySummary = document.createElement("summary");
+  priceHistorySummary.textContent = "Historique des prix";
+  const priceHistoryBody = document.createElement("div");
+  priceHistoryBody.className = "price-history-body";
+  priceHistoryBody.innerHTML = '<div class="price-history-empty">Chargement…</div>';
+  priceHistory.appendChild(priceHistorySummary);
+  priceHistory.appendChild(priceHistoryBody);
+
   card.appendChild(header);
   card.appendChild(controls);
   card.appendChild(grid);
   card.appendChild(footnote);
+  card.appendChild(sourceLink);
+  card.appendChild(priceHistory);
   resultsSection.appendChild(card);
 
-  cardRefs[providerKey] = { card, modelSelect, effortSelect, items, badges, footnote };
+  cardRefs[providerKey] = { card, modelSelect, effortSelect, items, badges, footnote, sourceLink, priceHistory, priceHistoryBody, priceHistoryLoaded: false };
+
+  priceHistory.addEventListener("toggle", () => {
+    if (priceHistory.open) loadPriceHistoryFor(providerKey);
+  });
 
   modelSelect.addEventListener("change", () => { updateCard(providerKey); refreshComparisonIfActive(); });
   effortSelect.addEventListener("change", () => { updateCard(providerKey); refreshComparisonIfActive(); });
@@ -985,6 +1120,23 @@ function updateCard(providerKey) {
     priceBadge.textContent = "Prix estimé";
     ref.badges.appendChild(priceBadge);
   }
+  const freshness = freshnessStatus(model.verifiedOn);
+  if (freshness) {
+    const freshnessBadge = document.createElement("span");
+    freshnessBadge.className = "badge " + freshness.level;
+    freshnessBadge.textContent = freshness.level === "stale"
+      ? `À vérifier — ${freshness.days} j`
+      : `Vérifié il y a ${freshness.days} j`;
+    ref.badges.appendChild(freshnessBadge);
+  }
+  if (model.sourceUrl) {
+    ref.sourceLink.href = model.sourceUrl;
+    ref.sourceLink.style.display = "inline-flex";
+  } else {
+    ref.sourceLink.style.display = "none";
+  }
+  ref.priceHistoryLoaded = false;
+  if (ref.priceHistory.open) loadPriceHistoryFor(providerKey);
   ref.footnote.style.display = (tokenizerReady && modelTokenizerMode === "exact") ? "none" : "block";
 
   const text = textInput.value;
@@ -1753,6 +1905,7 @@ function isRawMode() {
 function renderRawOutput() {
   document.body.classList.add("raw-mode");
   const output = {
+    appVersion: APP_VERSION,
     generatedAt: new Date().toISOString(),
     text: textInput.value,
     charCount: textInput.value.length,

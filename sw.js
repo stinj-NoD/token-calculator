@@ -1,8 +1,9 @@
-const CACHE_NAME = "tokencalc-v1";
+const CACHE_NAME = "tokencalc-v1.1.0";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./data/providers.json",
+  "./data/price-history.json",
   "https://cdn.jsdelivr.net/npm/gpt-tokenizer@3.4.0/dist/o200k_base.js",
 ];
 

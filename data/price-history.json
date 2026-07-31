@@ -1,0 +1,60 @@
+{
+  "opus-5": [
+    { "date": "2026-07-31", "priceIn": 5, "priceOut": 25, "sourceUrl": "https://www.anthropic.com/pricing" }
+  ],
+  "sonnet-5": [
+    { "date": "2026-07-31", "priceIn": 2, "priceOut": 10, "sourceUrl": "https://www.anthropic.com/pricing" },
+    { "date": "2026-08-31", "priceIn": 3, "priceOut": 15, "sourceUrl": "https://www.anthropic.com/pricing", "note": "Changement de prix programmé, déjà annoncé par Anthropic." }
+  ],
+  "haiku-4-5": [
+    { "date": "2026-07-31", "priceIn": 1, "priceOut": 5, "sourceUrl": "https://www.anthropic.com/pricing" }
+  ],
+  "fable-5": [
+    { "date": "2026-07-31", "priceIn": 10, "priceOut": 50, "sourceUrl": "https://www.anthropic.com/pricing" }
+  ],
+  "gpt-5-6-sol": [
+    { "date": "2026-07-31", "priceIn": 5, "priceOut": 30, "sourceUrl": "https://openai.com/api/pricing/" }
+  ],
+  "gpt-5-6-terra": [
+    { "date": "2026-07-31", "priceIn": 2.5, "priceOut": 15, "sourceUrl": "https://openai.com/api/pricing/" }
+  ],
+  "gpt-5-6-luna": [
+    { "date": "2026-07-31", "priceIn": 1, "priceOut": 6, "sourceUrl": "https://openai.com/api/pricing/" }
+  ],
+  "gemini-3-6-flash": [
+    { "date": "2026-07-31", "priceIn": 1.5, "priceOut": 7.5, "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing" }
+  ],
+  "gemini-3-5-flash": [
+    { "date": "2026-07-31", "priceIn": 1.5, "priceOut": 9.0, "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing" }
+  ],
+  "gemini-3-flash": [
+    { "date": "2026-07-31", "priceIn": 0.5, "priceOut": 3.0, "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing" }
+  ],
+  "gemini-3-1-flash-lite": [
+    { "date": "2026-07-31", "priceIn": 0.25, "priceOut": 1.5, "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing" }
+  ],
+  "gemini-3-1-pro": [
+    { "date": "2026-07-31", "priceIn": 3.5, "priceOut": 16, "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing", "note": "Prix estimé, non officiellement confirmé." }
+  ],
+  "opus-5-copilot": [
+    { "date": "2026-07-31", "priceIn": 5, "priceOut": 25, "sourceUrl": "https://docs.github.com/en/copilot/about-github-copilot/plans-for-github-copilot" }
+  ],
+  "grok-4-5": [
+    { "date": "2026-07-31", "priceIn": 2, "priceOut": 6, "sourceUrl": "https://x.ai/api" }
+  ],
+  "kimi-k2-7-code": [
+    { "date": "2026-07-31", "priceIn": 0.95, "priceOut": 4.0, "sourceUrl": "https://platform.moonshot.ai/docs/pricing" }
+  ],
+  "mistral-large-3": [
+    { "date": "2026-07-31", "priceIn": 2, "priceOut": 6, "sourceUrl": "https://mistral.ai/products/la-plateforme#pricing", "note": "Prix estimé, non officiellement confirmé." }
+  ],
+  "mistral-medium-3-5": [
+    { "date": "2026-07-31", "priceIn": 1.5, "priceOut": 7.5, "sourceUrl": "https://mistral.ai/products/la-plateforme#pricing", "note": "Prix estimé, non officiellement confirmé." }
+  ],
+  "deepseek-v4-pro": [
+    { "date": "2026-07-31", "priceIn": 0.435, "priceOut": 0.87, "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing" }
+  ],
+  "deepseek-v4-flash": [
+    { "date": "2026-07-31", "priceIn": 0.14, "priceOut": 0.28, "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing" }
+  ]
+}

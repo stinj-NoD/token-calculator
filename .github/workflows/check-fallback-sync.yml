@@ -1,0 +1,20 @@
+name: Check fallback data sync
+
+on:
+  pull_request:
+    paths:
+      - "data/providers.json"
+      - "index.html"
+  push:
+    branches: [main]
+    paths:
+      - "data/providers.json"
+      - "index.html"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier la synchronisation providers.json / FALLBACK_DATA
+        run: node scripts/check-fallback-sync.js
