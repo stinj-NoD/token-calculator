@@ -386,6 +386,35 @@ textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); ou
   gap: .75rem;
 }
 .sim-results { display: flex; gap: .75rem; flex-wrap: wrap; }
+.sim-mode-toggle { display: flex; gap: .5rem; }
+.sim-mode-btn.active { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.sim-text-turn {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: .6rem;
+  align-items: start;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .7rem;
+  margin-bottom: .6rem;
+}
+.sim-text-turn textarea {
+  width: 100%;
+  min-height: 70px;
+  background: var(--card-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .5rem .6rem;
+  font-family: inherit;
+  font-size: .85rem;
+  resize: vertical;
+  box-sizing: border-box;
+}
+@media (max-width: 640px) {
+  .sim-text-turn { grid-template-columns: 1fr; }
+}
 
 /* ===== Budget ===== */
 .budget-form {
@@ -517,13 +546,23 @@ body.raw-mode #budget-panel {
       <span id="sim-toggle-icon">▾</span>
     </button>
     <div class="panel-body" id="sim-body">
+      <div class="sim-mode-toggle" role="group" aria-label="Mode de simulation">
+        <button type="button" class="btn small sim-mode-btn active" id="sim-mode-avg-btn" aria-pressed="true">Moyennes</button>
+        <button type="button" class="btn small sim-mode-btn" id="sim-mode-text-btn" aria-pressed="false">Texte réel</button>
+      </div>
       <div class="sim-grid">
-        <div class="field"><label for="sim-turns">Nombre de tours</label><input type="number" id="sim-turns" min="1" value="10"></div>
-        <div class="field"><label for="sim-user-tokens">Tokens / message utilisateur</label><input type="number" id="sim-user-tokens" min="0" value="200"></div>
-        <div class="field"><label for="sim-assistant-tokens">Tokens / réponse IA</label><input type="number" id="sim-assistant-tokens" min="0" value="500"></div>
         <div class="field"><label for="sim-provider">Fournisseur</label><select id="sim-provider"></select></div>
         <div class="field"><label for="sim-model">Modèle</label><select id="sim-model"></select></div>
         <div class="field"><label for="sim-effort">Effort</label><select id="sim-effort"></select></div>
+      </div>
+      <div class="sim-grid" id="sim-avg-fields">
+        <div class="field"><label for="sim-turns">Nombre de tours</label><input type="number" id="sim-turns" min="1" value="10"></div>
+        <div class="field"><label for="sim-user-tokens">Tokens / message utilisateur</label><input type="number" id="sim-user-tokens" min="0" value="200"></div>
+        <div class="field"><label for="sim-assistant-tokens">Tokens / réponse IA</label><input type="number" id="sim-assistant-tokens" min="0" value="500"></div>
+      </div>
+      <div id="sim-text-fields" style="display:none">
+        <div id="sim-text-turns"></div>
+        <button type="button" class="btn small" id="sim-text-add-turn">+ Ajouter un tour</button>
       </div>
       <div class="sim-results">
         <div class="result-item"><div class="label">Tokens d'entrée cumulés</div><div class="value" id="sim-in-tokens">—</div></div>
@@ -601,10 +640,10 @@ const FALLBACK_DATA = {
       label: "Claude / Claude Code", category: "generalist", tokenizerMode: "proxy", proxyFactor: 1.05,
       efforts: ["low", "medium", "high", "max"], effortLabel: "Niveau d'effort",
       models: [
-        { id: "opus-5", name: "Opus 5", priceIn: 5, priceOut: 25 },
-        { id: "sonnet-5", name: "Sonnet 5", priceIn: 2, priceOut: 10, priceInAfter: 3, priceOutAfter: 15, priceChangeDate: "2026-08-31" },
-        { id: "haiku-4-5", name: "Haiku 4.5", priceIn: 1, priceOut: 5 },
-        { id: "fable-5", name: "Fable 5", priceIn: 10, priceOut: 50 },
+        { id: "opus-5", name: "Opus 5", priceIn: 5, priceOut: 25, proxyFactor: 1.03 },
+        { id: "sonnet-5", name: "Sonnet 5", priceIn: 2, priceOut: 10, priceInAfter: 3, priceOutAfter: 15, priceChangeDate: "2026-08-31", proxyFactor: 1.03 },
+        { id: "haiku-4-5", name: "Haiku 4.5", priceIn: 1, priceOut: 5, proxyFactor: 1.05 },
+        { id: "fable-5", name: "Fable 5", priceIn: 10, priceOut: 50, proxyFactor: 1.03 },
       ],
     },
     chatgpt: {
@@ -621,11 +660,11 @@ const FALLBACK_DATA = {
       label: "Gemini", category: "generalist", tokenizerMode: "proxy", proxyFactor: 1.0,
       efforts: ["low", "medium", "high", "max"], effortLabel: "Budget de réflexion",
       models: [
-        { id: "gemini-3-6-flash", name: "Gemini 3.6 Flash", priceIn: 1.5, priceOut: 7.5 },
-        { id: "gemini-3-5-flash", name: "Gemini 3.5 Flash", priceIn: 1.5, priceOut: 9.0 },
-        { id: "gemini-3-flash", name: "Gemini 3 Flash", priceIn: 0.5, priceOut: 3.0 },
-        { id: "gemini-3-1-flash-lite", name: "Gemini 3.1 Flash-Lite", priceIn: 0.25, priceOut: 1.5 },
-        { id: "gemini-3-1-pro", name: "Gemini 3.1 Pro", priceIn: 3.5, priceOut: 16, estimated: true },
+        { id: "gemini-3-6-flash", name: "Gemini 3.6 Flash", priceIn: 1.5, priceOut: 7.5, proxyFactor: 0.97 },
+        { id: "gemini-3-5-flash", name: "Gemini 3.5 Flash", priceIn: 1.5, priceOut: 9.0, proxyFactor: 0.97 },
+        { id: "gemini-3-flash", name: "Gemini 3 Flash", priceIn: 0.5, priceOut: 3.0, proxyFactor: 0.98 },
+        { id: "gemini-3-1-flash-lite", name: "Gemini 3.1 Flash-Lite", priceIn: 0.25, priceOut: 1.5, proxyFactor: 1.0 },
+        { id: "gemini-3-1-pro", name: "Gemini 3.1 Pro", priceIn: 3.5, priceOut: 16, estimated: true, proxyFactor: 0.95 },
       ],
     },
     copilot: {
@@ -652,8 +691,8 @@ const FALLBACK_DATA = {
       label: "Mistral AI (Le Chat)", category: "generalist", tokenizerMode: "proxy", proxyFactor: 1.1,
       efforts: ["low", "medium", "high"], effortLabel: "Niveau d'effort",
       models: [
-        { id: "mistral-large-3", name: "Mistral Large 3", priceIn: 2, priceOut: 6, estimated: true },
-        { id: "mistral-medium-3-5", name: "Mistral Medium 3.5", priceIn: 1.5, priceOut: 7.5, estimated: true },
+        { id: "mistral-large-3", name: "Mistral Large 3", priceIn: 2, priceOut: 6, estimated: true, proxyFactor: 1.12 },
+        { id: "mistral-medium-3-5", name: "Mistral Medium 3.5", priceIn: 1.5, priceOut: 7.5, estimated: true, proxyFactor: 1.08 },
       ],
     },
     deepseek: {
@@ -759,7 +798,7 @@ function modelTokenizerInfo(provider, model) {
   const isMixed = provider.tokenizerMode === "mixed";
   return {
     mode: isMixed ? model.tokenizer : provider.tokenizerMode,
-    proxyFactor: isMixed ? 1.0 : provider.proxyFactor,
+    proxyFactor: isMixed ? 1.0 : (model.proxyFactor ?? provider.proxyFactor),
   };
 }
 
@@ -1354,6 +1393,15 @@ const simEffortSelect = document.getElementById("sim-effort");
 const simTurnsInput = document.getElementById("sim-turns");
 const simUserTokensInput = document.getElementById("sim-user-tokens");
 const simAssistantTokensInput = document.getElementById("sim-assistant-tokens");
+const simModeAvgBtn = document.getElementById("sim-mode-avg-btn");
+const simModeTextBtn = document.getElementById("sim-mode-text-btn");
+const simAvgFields = document.getElementById("sim-avg-fields");
+const simTextFields = document.getElementById("sim-text-fields");
+const simTextTurnsContainer = document.getElementById("sim-text-turns");
+const simTextAddTurnBtn = document.getElementById("sim-text-add-turn");
+
+let simMode = "avg";
+let simTextTurns = [{ user: "", assistant: "" }];
 
 function simulateConversation(turns, avgUserTokens, avgAssistantTokens, effort, provider, model) {
   const multiplier = EFFORT_MULTIPLIERS[effort];
@@ -1373,6 +1421,29 @@ function simulateConversation(turns, avgUserTokens, avgAssistantTokens, effort, 
     lastTurnCost = cost;
     history += avgUserTokens + perTurnOutput;
   }
+  return { totalInput, totalOutput, totalCost: priceIn == null ? null : totalCost, lastTurnCost };
+}
+
+function simulateConversationFromText(turnsData, provider, model) {
+  const { mode, proxyFactor } = modelTokenizerInfo(provider, model);
+  const { priceIn, priceOut } = resolvePricing(model);
+  let history = "";
+  let totalInput = 0;
+  let totalOutput = 0;
+  let totalCost = 0;
+  let lastTurnCost = null;
+  turnsData.forEach((turn) => {
+    const userTokens = getTokenCount(turn.user, mode, proxyFactor);
+    const assistantTokens = getTokenCount(turn.assistant, mode, proxyFactor);
+    const historyTokens = getTokenCount(history, mode, proxyFactor);
+    const turnInput = historyTokens + userTokens;
+    totalInput += turnInput;
+    totalOutput += assistantTokens;
+    const cost = computeCost(turnInput, assistantTokens, priceIn, priceOut);
+    if (cost) totalCost += cost.total;
+    lastTurnCost = cost;
+    history += turn.user + turn.assistant;
+  });
   return { totalInput, totalOutput, totalCost: priceIn == null ? null : totalCost, lastTurnCost };
 }
 
@@ -1406,13 +1477,68 @@ function populateSimModelSelect() {
   runSimulation();
 }
 
+function renderSimTextTurns() {
+  simTextTurnsContainer.innerHTML = "";
+  simTextTurns.forEach((turn, i) => {
+    const row = document.createElement("div");
+    row.className = "sim-text-turn";
+
+    const userField = document.createElement("div");
+    userField.innerHTML = `<label>Tour ${i + 1} — Message utilisateur</label>`;
+    const userTextarea = document.createElement("textarea");
+    userTextarea.value = turn.user;
+    userTextarea.addEventListener("input", () => { turn.user = userTextarea.value; runSimulation(); });
+    userField.appendChild(userTextarea);
+
+    const assistantField = document.createElement("div");
+    assistantField.innerHTML = `<label>Réponse assistant</label>`;
+    const assistantTextarea = document.createElement("textarea");
+    assistantTextarea.value = turn.assistant;
+    assistantTextarea.addEventListener("input", () => { turn.assistant = assistantTextarea.value; runSimulation(); });
+    assistantField.appendChild(assistantTextarea);
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "btn small danger";
+    removeBtn.textContent = "✕";
+    removeBtn.disabled = simTextTurns.length <= 1;
+    removeBtn.addEventListener("click", () => {
+      simTextTurns.splice(i, 1);
+      renderSimTextTurns();
+      runSimulation();
+    });
+
+    row.appendChild(userField);
+    row.appendChild(assistantField);
+    row.appendChild(removeBtn);
+    simTextTurnsContainer.appendChild(row);
+  });
+}
+
+function setSimMode(mode) {
+  simMode = mode;
+  const isAvg = mode === "avg";
+  simAvgFields.style.display = isAvg ? "" : "none";
+  simTextFields.style.display = isAvg ? "none" : "";
+  simModeAvgBtn.classList.toggle("active", isAvg);
+  simModeAvgBtn.setAttribute("aria-pressed", String(isAvg));
+  simModeTextBtn.classList.toggle("active", !isAvg);
+  simModeTextBtn.setAttribute("aria-pressed", String(!isAvg));
+  runSimulation();
+}
+
 function runSimulation() {
   const provider = PROVIDERS[simProviderSelect.value];
   const model = provider.models.find((m) => m.id === simModelSelect.value);
-  const turns = Math.max(1, Number(simTurnsInput.value) || 1);
-  const avgUser = Number(simUserTokensInput.value) || 0;
-  const avgAssistant = Number(simAssistantTokensInput.value) || 0;
-  const result = simulateConversation(turns, avgUser, avgAssistant, simEffortSelect.value, provider, model);
+  let result;
+  if (simMode === "avg") {
+    const turns = Math.max(1, Number(simTurnsInput.value) || 1);
+    const avgUser = Number(simUserTokensInput.value) || 0;
+    const avgAssistant = Number(simAssistantTokensInput.value) || 0;
+    result = simulateConversation(turns, avgUser, avgAssistant, simEffortSelect.value, provider, model);
+  } else {
+    result = simulateConversationFromText(simTextTurns, provider, model);
+  }
   document.getElementById("sim-in-tokens").textContent = formatTokens(result.totalInput);
   document.getElementById("sim-out-tokens").textContent = formatTokens(result.totalOutput);
   document.getElementById("sim-last-turn-cost").textContent = result.lastTurnCost ? formatUSD(result.lastTurnCost.total) : "Non communiqué";
@@ -1420,13 +1546,18 @@ function runSimulation() {
 }
 
 function renderSimCompareTable() {
-  const turns = Math.max(1, Number(simTurnsInput.value) || 1);
-  const avgUser = Number(simUserTokensInput.value) || 0;
-  const avgAssistant = Number(simAssistantTokensInput.value) || 0;
   const rows = Object.entries(PROVIDERS).map(([key, provider]) => {
     const effort = provider.efforts.includes("medium") ? "medium" : provider.efforts[0];
     const model = provider.models.find((m) => resolvePricing(m).priceIn != null) || provider.models[0];
-    const result = simulateConversation(turns, avgUser, avgAssistant, effort, provider, model);
+    let result;
+    if (simMode === "avg") {
+      const turns = Math.max(1, Number(simTurnsInput.value) || 1);
+      const avgUser = Number(simUserTokensInput.value) || 0;
+      const avgAssistant = Number(simAssistantTokensInput.value) || 0;
+      result = simulateConversation(turns, avgUser, avgAssistant, effort, provider, model);
+    } else {
+      result = simulateConversationFromText(simTextTurns, provider, model);
+    }
     return { label: provider.label, modelName: model.name, totalCost: result.totalCost };
   }).sort((a, b) => (a.totalCost == null ? 1 : b.totalCost == null ? -1 : a.totalCost - b.totalCost));
 
@@ -1445,6 +1576,14 @@ simProviderSelect.addEventListener("change", populateSimModelSelect);
   el.addEventListener("input", runSimulation);
   el.addEventListener("change", runSimulation);
 });
+simModeAvgBtn.addEventListener("click", () => setSimMode("avg"));
+simModeTextBtn.addEventListener("click", () => setSimMode("text"));
+simTextAddTurnBtn.addEventListener("click", () => {
+  simTextTurns.push({ user: "", assistant: "" });
+  renderSimTextTurns();
+  runSimulation();
+});
+renderSimTextTurns();
 document.getElementById("sim-compare-btn").addEventListener("click", renderSimCompareTable);
 
 // ===== Suivi de budget =====

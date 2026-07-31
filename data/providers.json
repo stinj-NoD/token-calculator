@@ -11,10 +11,10 @@
       "efforts": ["low", "medium", "high", "max"],
       "effortLabel": "Niveau d'effort",
       "models": [
-        { "id": "opus-5", "name": "Opus 5", "priceIn": 5, "priceOut": 25 },
-        { "id": "sonnet-5", "name": "Sonnet 5", "priceIn": 2, "priceOut": 10, "priceInAfter": 3, "priceOutAfter": 15, "priceChangeDate": "2026-08-31" },
-        { "id": "haiku-4-5", "name": "Haiku 4.5", "priceIn": 1, "priceOut": 5 },
-        { "id": "fable-5", "name": "Fable 5", "priceIn": 10, "priceOut": 50 }
+        { "id": "opus-5", "name": "Opus 5", "priceIn": 5, "priceOut": 25, "proxyFactor": 1.03 },
+        { "id": "sonnet-5", "name": "Sonnet 5", "priceIn": 2, "priceOut": 10, "priceInAfter": 3, "priceOutAfter": 15, "priceChangeDate": "2026-08-31", "proxyFactor": 1.03 },
+        { "id": "haiku-4-5", "name": "Haiku 4.5", "priceIn": 1, "priceOut": 5, "proxyFactor": 1.05 },
+        { "id": "fable-5", "name": "Fable 5", "priceIn": 10, "priceOut": 50, "proxyFactor": 1.03 }
       ]
     },
     "chatgpt": {
@@ -38,11 +38,11 @@
       "efforts": ["low", "medium", "high", "max"],
       "effortLabel": "Budget de réflexion",
       "models": [
-        { "id": "gemini-3-6-flash", "name": "Gemini 3.6 Flash", "priceIn": 1.5, "priceOut": 7.5 },
-        { "id": "gemini-3-5-flash", "name": "Gemini 3.5 Flash", "priceIn": 1.5, "priceOut": 9.0 },
-        { "id": "gemini-3-flash", "name": "Gemini 3 Flash", "priceIn": 0.5, "priceOut": 3.0 },
-        { "id": "gemini-3-1-flash-lite", "name": "Gemini 3.1 Flash-Lite", "priceIn": 0.25, "priceOut": 1.5 },
-        { "id": "gemini-3-1-pro", "name": "Gemini 3.1 Pro", "priceIn": 3.5, "priceOut": 16, "estimated": true }
+        { "id": "gemini-3-6-flash", "name": "Gemini 3.6 Flash", "priceIn": 1.5, "priceOut": 7.5, "proxyFactor": 0.97 },
+        { "id": "gemini-3-5-flash", "name": "Gemini 3.5 Flash", "priceIn": 1.5, "priceOut": 9.0, "proxyFactor": 0.97 },
+        { "id": "gemini-3-flash", "name": "Gemini 3 Flash", "priceIn": 0.5, "priceOut": 3.0, "proxyFactor": 0.98 },
+        { "id": "gemini-3-1-flash-lite", "name": "Gemini 3.1 Flash-Lite", "priceIn": 0.25, "priceOut": 1.5, "proxyFactor": 1.0 },
+        { "id": "gemini-3-1-pro", "name": "Gemini 3.1 Pro", "priceIn": 3.5, "priceOut": 16, "estimated": true, "proxyFactor": 0.95 }
       ]
     },
     "copilot": {
@@ -88,8 +88,8 @@
       "efforts": ["low", "medium", "high"],
       "effortLabel": "Niveau d'effort",
       "models": [
-        { "id": "mistral-large-3", "name": "Mistral Large 3", "priceIn": 2, "priceOut": 6, "estimated": true },
-        { "id": "mistral-medium-3-5", "name": "Mistral Medium 3.5", "priceIn": 1.5, "priceOut": 7.5, "estimated": true }
+        { "id": "mistral-large-3", "name": "Mistral Large 3", "priceIn": 2, "priceOut": 6, "estimated": true, "proxyFactor": 1.12 },
+        { "id": "mistral-medium-3-5", "name": "Mistral Medium 3.5", "priceIn": 1.5, "priceOut": 7.5, "estimated": true, "proxyFactor": 1.08 }
       ]
     },
     "deepseek": {
