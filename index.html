@@ -103,10 +103,7 @@ footer {
 .status-pill .dot { width: .5rem; height: .5rem; border-radius: 50%; background: currentColor; }
 
 /* ===== Buttons (shared) ===== */
-button {
-  font-family: inherit;
-  cursor: pointer;
-}
+button { font-family: inherit; cursor: pointer; }
 .btn {
   background: var(--card-bg);
   color: var(--fg);
@@ -200,11 +197,37 @@ textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); ou
   font-size: .9rem;
 }
 
+/* ===== Provider filter bar ===== */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+.filter-bar .filter-label { font-size: .82rem; color: var(--fg-muted); margin-right: .3rem; }
+.filter-chip {
+  background: var(--card-bg);
+  color: var(--fg-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: .35rem .75rem;
+  font-size: .8rem;
+  font-weight: 500;
+}
+.filter-chip.active { background: color-mix(in srgb, var(--accent) 16%, var(--card-bg)); color: var(--fg); border-color: var(--accent); }
+
 /* ===== Results / cards ===== */
 #results {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+.category-separator {
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--fg-muted);
+  padding-top: .5rem;
 }
 .loading-note, .error-note {
   color: var(--fg-muted);
@@ -218,6 +241,7 @@ textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); ou
   border-radius: 14px;
   padding: 1.25rem;
 }
+.card.hidden { display: none; }
 .card-header {
   display: flex;
   align-items: center;
@@ -252,7 +276,7 @@ textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); ou
   color: var(--fg-muted);
   margin-bottom: .3rem;
 }
-.field select {
+.field select, .field input {
   width: 100%;
   background: var(--input-bg);
   color: var(--fg);
@@ -285,21 +309,39 @@ textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); ou
   color: var(--fg-muted);
 }
 
-/* ===== Actions bar ===== */
-#actions-bar {
-  display: flex;
-  gap: .6rem;
-  flex-wrap: wrap;
+/* ===== Comparison table ===== */
+#comparison-table-wrap { overflow-x: auto; }
+#comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  font-size: .85rem;
 }
+#comparison-table th, #comparison-table td {
+  text-align: left;
+  padding: .6rem .8rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+#comparison-table th { color: var(--fg-muted); font-weight: 600; font-size: .75rem; text-transform: uppercase; }
+#comparison-table tr:last-child td { border-bottom: none; }
+#comparison-table tr.cheapest { background: color-mix(in srgb, var(--accent) 12%, var(--card-bg)); }
+#comparison-table tr.cheapest td:first-child { font-weight: 700; color: var(--accent); }
 
-/* ===== History panel ===== */
-#history-panel {
+/* ===== Actions bar ===== */
+#actions-bar { display: flex; gap: .6rem; flex-wrap: wrap; }
+
+/* ===== Collapsible panels (history / budget / simulator) ===== */
+.panel {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
 }
-#history-toggle {
+.panel-toggle {
   width: 100%;
   background: none;
   border: none;
@@ -311,9 +353,11 @@ textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); ou
   font-size: .95rem;
   font-weight: 600;
 }
-#history-body { padding: 0 1.25rem 1.25rem; display: none; flex-direction: column; gap: .6rem; }
-#history-body.open { display: flex; }
-.history-empty { color: var(--fg-muted); font-size: .85rem; }
+.panel-body { padding: 0 1.25rem 1.25rem; display: none; flex-direction: column; gap: .8rem; }
+.panel-body.open { display: flex; }
+.panel-empty { color: var(--fg-muted); font-size: .85rem; }
+
+/* ===== History entries ===== */
 .history-actions { display: flex; justify-content: flex-end; }
 .history-entry {
   display: flex;
@@ -334,8 +378,68 @@ textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); ou
 .btn.small { padding: .35rem .6rem; font-size: .78rem; }
 .btn.danger { color: var(--danger); }
 
+/* ===== Simulator ===== */
+.sim-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: .75rem;
+}
+.sim-results { display: flex; gap: .75rem; flex-wrap: wrap; }
+
+/* ===== Budget ===== */
+.budget-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: .6rem;
+  align-items: end;
+}
+.budget-summary {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+.budget-progress-track {
+  width: 100%;
+  height: .6rem;
+  border-radius: 999px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.budget-progress-fill { height: 100%; background: var(--accent); transition: width .2s; }
+.budget-progress-fill.over { background: var(--danger); }
+.budget-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .6rem .8rem;
+  font-size: .85rem;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
 @media (max-width: 640px) {
   .card-controls { grid-template-columns: 1fr; }
+}
+
+/* ===== Raw / headless mode ===== */
+body.raw-mode header, body.raw-mode footer, body.raw-mode #input-zone,
+body.raw-mode .filter-bar, body.raw-mode #results, body.raw-mode #actions-bar,
+body.raw-mode #comparison-view, body.raw-mode #conversation-simulator, body.raw-mode #history-panel,
+body.raw-mode #budget-panel {
+  display: none;
+}
+#raw-output { max-width: 800px; margin: 1.5rem auto; padding: 0 1.5rem; }
+#raw-output pre {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  overflow-x: auto;
+  font-size: .82rem;
 }
 </style>
 </head>
@@ -374,27 +478,100 @@ textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); ou
     </div>
   </section>
 
+  <div class="filter-bar" id="filter-bar">
+    <span class="filter-label">Fournisseurs affichés :</span>
+  </div>
+
+  <div id="comparison-view">
+    <div id="actions-bar">
+      <button type="button" class="btn" id="view-toggle-btn">📊 Vue comparatif</button>
+      <button type="button" class="btn" id="export-json-btn">⬇️ Exporter JSON</button>
+      <button type="button" class="btn" id="export-csv-btn">⬇️ Exporter CSV</button>
+      <button type="button" class="btn" id="copy-link-btn">🔗 Copier le lien</button>
+    </div>
+  </div>
+
   <section id="results">
     <div class="loading-note">Chargement des données de prix…</div>
   </section>
 
-  <section id="actions-bar">
-    <button type="button" class="btn" id="export-json-btn">⬇️ Exporter JSON</button>
-    <button type="button" class="btn" id="export-csv-btn">⬇️ Exporter CSV</button>
-    <button type="button" class="btn" id="copy-link-btn">🔗 Copier le lien</button>
+  <div id="comparison-table-wrap" style="display:none">
+    <table id="comparison-table">
+      <thead>
+        <tr><th>Fournisseur</th><th>Modèle</th><th>Tokens entrée</th><th>Tokens sortie</th><th>Coût total</th><th></th></tr>
+      </thead>
+      <tbody id="comparison-table-body"></tbody>
+    </table>
+  </div>
+
+  <section class="panel" id="conversation-simulator">
+    <button type="button" class="panel-toggle" id="sim-toggle">
+      <span>💬 Simulateur de conversation multi-tours</span>
+      <span id="sim-toggle-icon">▾</span>
+    </button>
+    <div class="panel-body" id="sim-body">
+      <div class="sim-grid">
+        <div class="field"><label for="sim-turns">Nombre de tours</label><input type="number" id="sim-turns" min="1" value="10"></div>
+        <div class="field"><label for="sim-user-tokens">Tokens / message utilisateur</label><input type="number" id="sim-user-tokens" min="0" value="200"></div>
+        <div class="field"><label for="sim-assistant-tokens">Tokens / réponse IA</label><input type="number" id="sim-assistant-tokens" min="0" value="500"></div>
+        <div class="field"><label for="sim-provider">Fournisseur</label><select id="sim-provider"></select></div>
+        <div class="field"><label for="sim-model">Modèle</label><select id="sim-model"></select></div>
+        <div class="field"><label for="sim-effort">Effort</label><select id="sim-effort"></select></div>
+      </div>
+      <div class="sim-results">
+        <div class="result-item"><div class="label">Tokens d'entrée cumulés</div><div class="value" id="sim-in-tokens">—</div></div>
+        <div class="result-item"><div class="label">Tokens de sortie cumulés</div><div class="value" id="sim-out-tokens">—</div></div>
+        <div class="result-item"><div class="label">Coût du dernier tour</div><div class="value" id="sim-last-turn-cost">—</div></div>
+        <div class="result-item total"><div class="label">Coût total de la conversation</div><div class="value" id="sim-total-cost">—</div></div>
+      </div>
+      <button type="button" class="btn" id="sim-compare-btn">Comparer sur tous les fournisseurs</button>
+      <div id="sim-compare-results"></div>
+    </div>
   </section>
 
-  <section id="history-panel">
-    <button type="button" id="history-toggle">
+  <section class="panel" id="budget-panel">
+    <button type="button" class="panel-toggle" id="budget-toggle">
+      <span id="budget-toggle-label">💰 Suivi de budget</span>
+      <span id="budget-toggle-icon">▾</span>
+    </button>
+    <div class="panel-body" id="budget-body">
+      <div class="field" style="max-width:200px">
+        <label for="budget-monthly">Budget mensuel ($)</label>
+        <input type="number" id="budget-monthly" min="0" step="1">
+      </div>
+      <div class="budget-summary">
+        <span id="budget-summary-text"></span>
+        <div class="budget-progress-track"><div class="budget-progress-fill" id="budget-progress-fill"></div></div>
+      </div>
+      <div id="budget-chart"></div>
+      <form class="budget-form" id="budget-form">
+        <div class="field"><label for="budget-date">Date</label><input type="date" id="budget-date"></div>
+        <div class="field"><label for="budget-provider">Fournisseur</label><select id="budget-provider"></select></div>
+        <div class="field"><label for="budget-model">Modèle</label><select id="budget-model"></select></div>
+        <div class="field"><label for="budget-in-tokens">Tokens entrée</label><input type="number" id="budget-in-tokens" min="0" value="0"></div>
+        <div class="field"><label for="budget-out-tokens">Tokens sortie</label><input type="number" id="budget-out-tokens" min="0" value="0"></div>
+        <button type="submit" class="btn primary">Ajouter</button>
+      </form>
+      <div id="budget-entries"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="history-panel">
+    <button type="button" class="panel-toggle" id="history-toggle">
       <span id="history-toggle-label">Historique (0)</span>
       <span id="history-toggle-icon">▾</span>
     </button>
-    <div id="history-body"></div>
+    <div class="panel-body" id="history-body"></div>
   </section>
 </main>
 
+<div id="raw-output" style="display:none">
+  <pre id="raw-json"></pre>
+  <button type="button" class="btn" id="raw-copy-btn">Copier</button>
+</div>
+
 <footer>
-  <span id="data-footer-note">Tous les chiffres (tokens, coûts) sont des estimations à but comparatif. Seul le comptage ChatGPT/Codex utilise le tokenizer OpenAI réel (o200k_base) ; les autres fournisseurs n'exposent pas de tokenizer public et sont approximés via ce même tokenizer comme proxy.</span>
+  <span id="data-footer-note">Tous les chiffres (tokens, coûts) sont des estimations à but comparatif. Seul le comptage ChatGPT/Codex utilise le tokenizer OpenAI réel (o200k_base) ; les autres fournisseurs n'exposent pas de tokenizer public et sont approximés via ce même tokenizer comme proxy. Le mode "résultat brut" (paramètre ?raw=1) n'est pas une vraie API serveur — c'est une page statique qui affiche un bloc JSON à lire via un navigateur automatisé (Playwright/Puppeteer).</span>
 </footer>
 
 <script type="module">
@@ -407,13 +584,14 @@ let usingFallbackData = false;
 // Copie de secours utilisée uniquement si le fetch de data/providers.json échoue
 // (ex: ouverture locale en file:// où Chrome bloque fetch() par défaut) ou renvoie
 // un JSON invalide -- garantit que l'usage local par double-clic continue de fonctionner.
+// Doit rester synchronisée avec data/providers.json à chaque modification.
 const FALLBACK_DATA = {
   lastUpdated: "2026-07-31",
-  effortMultipliers: { minimal: 0.7, low: 1, medium: 1.5, high: 2.5, max: 4 },
-  effortLabels: { minimal: "Minimal", low: "Faible", medium: "Moyen", high: "Élevé", max: "Maximum" },
+  effortMultipliers: { minimal: 0.7, low: 1, medium: 1.5, high: 2.5, max: 4, standard: 1 },
+  effortLabels: { minimal: "Minimal", low: "Faible", medium: "Moyen", high: "Élevé", max: "Maximum", standard: "Standard" },
   providers: {
     claude: {
-      label: "Claude / Claude Code", tokenizerMode: "proxy", proxyFactor: 1.05,
+      label: "Claude / Claude Code", category: "generalist", tokenizerMode: "proxy", proxyFactor: 1.05,
       efforts: ["low", "medium", "high", "max"], effortLabel: "Niveau d'effort",
       models: [
         { id: "opus-5", name: "Opus 5", priceIn: 5, priceOut: 25 },
@@ -423,7 +601,7 @@ const FALLBACK_DATA = {
       ],
     },
     chatgpt: {
-      label: "ChatGPT / Codex", tokenizerMode: "exact",
+      label: "ChatGPT / Codex", category: "generalist", tokenizerMode: "exact",
       efforts: ["minimal", "low", "medium", "high"], effortLabel: "Niveau d'effort",
       models: [
         { id: "gpt-5-6-sol", name: "GPT-5.6 Sol (flagship)", priceIn: 5, priceOut: 30 },
@@ -433,7 +611,7 @@ const FALLBACK_DATA = {
       ],
     },
     gemini: {
-      label: "Gemini", tokenizerMode: "proxy", proxyFactor: 1.0,
+      label: "Gemini", category: "generalist", tokenizerMode: "proxy", proxyFactor: 1.0,
       efforts: ["low", "medium", "high", "max"], effortLabel: "Budget de réflexion",
       models: [
         { id: "gemini-3-6-flash", name: "Gemini 3.6 Flash", priceIn: 1.5, priceOut: 7.5 },
@@ -444,13 +622,39 @@ const FALLBACK_DATA = {
       ],
     },
     copilot: {
-      label: "GitHub Copilot", tokenizerMode: "mixed",
+      label: "GitHub Copilot", category: "generalist", tokenizerMode: "mixed",
       efforts: ["low", "medium", "high"], effortLabel: "Niveau d'effort",
       models: [
         { id: "gpt-5-3-codex", name: "GPT-5.3-Codex (défaut)", priceIn: null, priceOut: null, tokenizer: "exact" },
         { id: "opus-5-copilot", name: "Claude Opus 5", priceIn: 5, priceOut: 25, tokenizer: "proxy" },
         { id: "grok-4-5", name: "Grok 4.5", priceIn: null, priceOut: null, tokenizer: "proxy" },
         { id: "kimi-k2-7", name: "Kimi K2.7", priceIn: null, priceOut: null, tokenizer: "proxy" },
+      ],
+    },
+    grok: {
+      label: "xAI Grok", category: "generalist", tokenizerMode: "proxy", proxyFactor: 1.05,
+      efforts: ["standard"], effortLabel: "Mode",
+      models: [{ id: "grok-4-5", name: "Grok 4.5", priceIn: 2, priceOut: 6 }],
+    },
+    kimi: {
+      label: "Moonshot AI Kimi", category: "code", tokenizerMode: "proxy", proxyFactor: 1.05,
+      efforts: ["standard"], effortLabel: "Mode",
+      models: [{ id: "kimi-k2-7-code", name: "Kimi K2.7 Code", priceIn: 0.95, priceOut: 4.0 }],
+    },
+    mistral: {
+      label: "Mistral AI (Le Chat)", category: "generalist", tokenizerMode: "proxy", proxyFactor: 1.1,
+      efforts: ["low", "medium", "high"], effortLabel: "Niveau d'effort",
+      models: [
+        { id: "mistral-large-3", name: "Mistral Large 3", priceIn: 2, priceOut: 6, estimated: true },
+        { id: "mistral-medium-3-5", name: "Mistral Medium 3.5", priceIn: 1.5, priceOut: 7.5, estimated: true },
+      ],
+    },
+    deepseek: {
+      label: "DeepSeek", category: "economy", tokenizerMode: "proxy", proxyFactor: 1.05,
+      efforts: ["standard"], effortLabel: "Mode",
+      models: [
+        { id: "deepseek-v4-pro", name: "DeepSeek V4-Pro", priceIn: 0.435, priceOut: 0.87 },
+        { id: "deepseek-v4-flash", name: "DeepSeek V4-Flash", priceIn: 0.14, priceOut: 0.28 },
       ],
     },
   },
@@ -544,6 +748,14 @@ function debounce(fn, delay) {
   };
 }
 
+function modelTokenizerInfo(provider, model) {
+  const isMixed = provider.tokenizerMode === "mixed";
+  return {
+    mode: isMixed ? model.tokenizer : provider.tokenizerMode,
+    proxyFactor: isMixed ? 1.0 : provider.proxyFactor,
+  };
+}
+
 // ===== DOM refs =====
 const resultsSection = document.getElementById("results");
 const textInput = document.getElementById("text-input");
@@ -552,9 +764,69 @@ const outputLengthInput = document.getElementById("output-length");
 let outputLengthTouched = false;
 const cardRefs = {};
 
+// ===== Provider visibility filters =====
+const VISIBILITY_KEY = "tokencalc-visible-providers";
+let visibleProviders = null;
+
+function loadVisibilityPrefs() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(VISIBILITY_KEY));
+    return Array.isArray(stored) ? stored : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function saveVisibilityPrefs() {
+  try {
+    localStorage.setItem(VISIBILITY_KEY, JSON.stringify(visibleProviders));
+  } catch (e) {
+    // stockage indisponible : la préférence ne sera simplement pas retenue.
+  }
+}
+
+function toggleProviderVisibility(key) {
+  if (visibleProviders.includes(key)) {
+    visibleProviders = visibleProviders.filter((k) => k !== key);
+  } else {
+    visibleProviders.push(key);
+  }
+  saveVisibilityPrefs();
+  applyVisibility();
+  renderProviderFilters();
+}
+
+function applyVisibility() {
+  Object.entries(cardRefs).forEach(([key, ref]) => {
+    ref.card.classList.toggle("hidden", !visibleProviders.includes(key));
+  });
+}
+
+function renderProviderFilters() {
+  const bar = document.getElementById("filter-bar");
+  bar.querySelectorAll(".filter-chip").forEach((el) => el.remove());
+  Object.entries(PROVIDERS).forEach(([key, provider]) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "filter-chip" + (visibleProviders.includes(key) ? " active" : "");
+    chip.textContent = provider.label;
+    chip.addEventListener("click", () => toggleProviderVisibility(key));
+    bar.appendChild(chip);
+  });
+}
+
+function sortedProviderEntries() {
+  return Object.entries(PROVIDERS).sort((a, b) => {
+    const catA = a[1].category || "generalist";
+    const catB = b[1].category || "generalist";
+    return catA.localeCompare(catB);
+  });
+}
+
 function buildCard(providerKey, provider) {
   const card = document.createElement("div");
   card.className = "card";
+  card.dataset.category = provider.category || "generalist";
 
   const header = document.createElement("div");
   header.className = "card-header";
@@ -591,7 +863,7 @@ function buildCard(providerKey, provider) {
     const opt = document.createElement("option");
     opt.value = e;
     opt.textContent = EFFORT_LABELS[e];
-    if (e === "medium") opt.selected = true;
+    if (e === "medium" || (provider.efforts.length === 1)) opt.selected = true;
     effortSelect.appendChild(opt);
   });
   effortField.appendChild(effortLabel);
@@ -635,10 +907,10 @@ function buildCard(providerKey, provider) {
   card.appendChild(footnote);
   resultsSection.appendChild(card);
 
-  cardRefs[providerKey] = { modelSelect, effortSelect, items, badges, footnote };
+  cardRefs[providerKey] = { card, modelSelect, effortSelect, items, badges, footnote };
 
-  modelSelect.addEventListener("change", () => updateCard(providerKey));
-  effortSelect.addEventListener("change", () => updateCard(providerKey));
+  modelSelect.addEventListener("change", () => { updateCard(providerKey); refreshComparisonIfActive(); });
+  effortSelect.addEventListener("change", () => { updateCard(providerKey); refreshComparisonIfActive(); });
 }
 
 function updateCard(providerKey) {
@@ -646,10 +918,7 @@ function updateCard(providerKey) {
   const ref = cardRefs[providerKey];
   const model = provider.models.find((m) => m.id === ref.modelSelect.value);
   const effort = ref.effortSelect.value;
-
-  const isMixed = provider.tokenizerMode === "mixed";
-  const modelTokenizerMode = isMixed ? model.tokenizer : provider.tokenizerMode;
-  const proxyFactor = isMixed ? 1.0 : provider.proxyFactor;
+  const { mode: modelTokenizerMode, proxyFactor } = modelTokenizerInfo(provider, model);
 
   ref.badges.innerHTML = "";
   const modeBadge = document.createElement("span");
@@ -695,6 +964,7 @@ function updateCard(providerKey) {
 
 function updateAllCards() {
   Object.keys(PROVIDERS).forEach(updateCard);
+  refreshComparisonIfActive();
 }
 
 function snapshotResults() {
@@ -716,6 +986,74 @@ function snapshotResults() {
     };
   });
 }
+
+// ===== Comparison table (vue tableau) =====
+let comparisonViewActive = false;
+const viewToggleBtn = document.getElementById("view-toggle-btn");
+const comparisonWrap = document.getElementById("comparison-table-wrap");
+const comparisonBody = document.getElementById("comparison-table-body");
+
+function buildComparisonRows() {
+  const text = textInput.value;
+  const baseOutput = Number(outputLengthInput.value) || 0;
+  const rows = [];
+  Object.entries(PROVIDERS).forEach(([key, provider]) => {
+    const selectedEffort = cardRefs[key] ? cardRefs[key].effortSelect.value : provider.efforts[0];
+    provider.models.forEach((model) => {
+      const { mode, proxyFactor } = modelTokenizerInfo(provider, model);
+      const inputTokens = getTokenCount(text, mode, proxyFactor);
+      const outputTokens = Math.round(baseOutput * EFFORT_MULTIPLIERS[selectedEffort]);
+      const { priceIn, priceOut } = resolvePricing(model);
+      const cost = computeCost(inputTokens, outputTokens, priceIn, priceOut);
+      rows.push({
+        providerLabel: provider.label,
+        modelName: model.name,
+        inputTokens,
+        outputTokens,
+        totalCost: cost ? cost.total : null,
+        estimated: !!model.estimated,
+        proxy: mode !== "exact",
+      });
+    });
+  });
+  rows.sort((a, b) => {
+    if (a.totalCost == null) return 1;
+    if (b.totalCost == null) return -1;
+    return a.totalCost - b.totalCost;
+  });
+  return rows;
+}
+
+function renderComparisonTable() {
+  const rows = buildComparisonRows();
+  comparisonBody.innerHTML = "";
+  rows.forEach((row, i) => {
+    const tr = document.createElement("tr");
+    if (i === 0 && row.totalCost != null) tr.classList.add("cheapest");
+    const badgeText = [row.proxy ? "Estimation" : "Exact", row.estimated ? "Prix estimé" : null].filter(Boolean).join(" · ");
+    tr.innerHTML = `
+      <td>${row.providerLabel}</td>
+      <td>${row.modelName}</td>
+      <td>${formatTokens(row.inputTokens)}</td>
+      <td>${formatTokens(row.outputTokens)}</td>
+      <td>${formatUSD(row.totalCost)}</td>
+      <td style="font-size:.72rem;color:var(--fg-muted)">${badgeText}</td>
+    `;
+    comparisonBody.appendChild(tr);
+  });
+}
+
+function refreshComparisonIfActive() {
+  if (comparisonViewActive) renderComparisonTable();
+}
+
+viewToggleBtn.addEventListener("click", () => {
+  comparisonViewActive = !comparisonViewActive;
+  resultsSection.style.display = comparisonViewActive ? "none" : "flex";
+  comparisonWrap.style.display = comparisonViewActive ? "block" : "none";
+  viewToggleBtn.textContent = comparisonViewActive ? "🗂️ Vue cartes" : "📊 Vue comparatif";
+  if (comparisonViewActive) renderComparisonTable();
+});
 
 // ===== Import de fichiers =====
 const importBtn = document.getElementById("import-btn");
@@ -933,7 +1271,7 @@ function renderHistoryPanel() {
 
   if (entries.length === 0) {
     const empty = document.createElement("div");
-    empty.className = "history-empty";
+    empty.className = "panel-empty";
     empty.textContent = "Aucun calcul sauvegardé pour le moment.";
     historyBody.appendChild(empty);
     return;
@@ -999,6 +1337,290 @@ const debouncedAutoSave = debounce(() => {
   if (textInput.value.trim().length > 20) saveHistoryEntry();
 }, 1200);
 
+// ===== Simulateur de conversation multi-tours =====
+const simToggle = document.getElementById("sim-toggle");
+const simBody = document.getElementById("sim-body");
+const simToggleIcon = document.getElementById("sim-toggle-icon");
+const simProviderSelect = document.getElementById("sim-provider");
+const simModelSelect = document.getElementById("sim-model");
+const simEffortSelect = document.getElementById("sim-effort");
+const simTurnsInput = document.getElementById("sim-turns");
+const simUserTokensInput = document.getElementById("sim-user-tokens");
+const simAssistantTokensInput = document.getElementById("sim-assistant-tokens");
+
+function simulateConversation(turns, avgUserTokens, avgAssistantTokens, effort, provider, model) {
+  const multiplier = EFFORT_MULTIPLIERS[effort];
+  const perTurnOutput = Math.round(avgAssistantTokens * multiplier);
+  const { priceIn, priceOut } = resolvePricing(model);
+  let history = 0;
+  let totalInput = 0;
+  let totalOutput = 0;
+  let totalCost = 0;
+  let lastTurnCost = null;
+  for (let i = 1; i <= turns; i++) {
+    const turnInput = history + avgUserTokens;
+    totalInput += turnInput;
+    totalOutput += perTurnOutput;
+    const cost = computeCost(turnInput, perTurnOutput, priceIn, priceOut);
+    if (cost) totalCost += cost.total;
+    lastTurnCost = cost;
+    history += avgUserTokens + perTurnOutput;
+  }
+  return { totalInput, totalOutput, totalCost: priceIn == null ? null : totalCost, lastTurnCost };
+}
+
+function populateSimProviderSelects() {
+  simProviderSelect.innerHTML = "";
+  Object.entries(PROVIDERS).forEach(([key, provider]) => {
+    const opt = document.createElement("option");
+    opt.value = key;
+    opt.textContent = provider.label;
+    simProviderSelect.appendChild(opt);
+  });
+  populateSimModelSelect();
+}
+
+function populateSimModelSelect() {
+  const provider = PROVIDERS[simProviderSelect.value];
+  simModelSelect.innerHTML = "";
+  provider.models.forEach((m) => {
+    const opt = document.createElement("option");
+    opt.value = m.id;
+    opt.textContent = m.name;
+    simModelSelect.appendChild(opt);
+  });
+  simEffortSelect.innerHTML = "";
+  provider.efforts.forEach((e) => {
+    const opt = document.createElement("option");
+    opt.value = e;
+    opt.textContent = EFFORT_LABELS[e];
+    simEffortSelect.appendChild(opt);
+  });
+  runSimulation();
+}
+
+function runSimulation() {
+  const provider = PROVIDERS[simProviderSelect.value];
+  const model = provider.models.find((m) => m.id === simModelSelect.value);
+  const turns = Math.max(1, Number(simTurnsInput.value) || 1);
+  const avgUser = Number(simUserTokensInput.value) || 0;
+  const avgAssistant = Number(simAssistantTokensInput.value) || 0;
+  const result = simulateConversation(turns, avgUser, avgAssistant, simEffortSelect.value, provider, model);
+  document.getElementById("sim-in-tokens").textContent = formatTokens(result.totalInput);
+  document.getElementById("sim-out-tokens").textContent = formatTokens(result.totalOutput);
+  document.getElementById("sim-last-turn-cost").textContent = result.lastTurnCost ? formatUSD(result.lastTurnCost.total) : "Non communiqué";
+  document.getElementById("sim-total-cost").textContent = result.totalCost == null ? "Non communiqué" : formatUSD(result.totalCost);
+}
+
+function renderSimCompareTable() {
+  const turns = Math.max(1, Number(simTurnsInput.value) || 1);
+  const avgUser = Number(simUserTokensInput.value) || 0;
+  const avgAssistant = Number(simAssistantTokensInput.value) || 0;
+  const rows = Object.entries(PROVIDERS).map(([key, provider]) => {
+    const effort = provider.efforts.includes("medium") ? "medium" : provider.efforts[0];
+    const model = provider.models.find((m) => resolvePricing(m).priceIn != null) || provider.models[0];
+    const result = simulateConversation(turns, avgUser, avgAssistant, effort, provider, model);
+    return { label: provider.label, modelName: model.name, totalCost: result.totalCost };
+  }).sort((a, b) => (a.totalCost == null ? 1 : b.totalCost == null ? -1 : a.totalCost - b.totalCost));
+
+  const container = document.getElementById("sim-compare-results");
+  container.innerHTML = rows.map((r) =>
+    `<div class="budget-entry"><span>${r.label} — ${r.modelName}</span><strong>${r.totalCost == null ? "Non communiqué" : formatUSD(r.totalCost)}</strong></div>`
+  ).join("");
+}
+
+simToggle.addEventListener("click", () => {
+  const open = simBody.classList.toggle("open");
+  simToggleIcon.textContent = open ? "▴" : "▾";
+});
+simProviderSelect.addEventListener("change", populateSimModelSelect);
+[simModelSelect, simEffortSelect, simTurnsInput, simUserTokensInput, simAssistantTokensInput].forEach((el) => {
+  el.addEventListener("input", runSimulation);
+  el.addEventListener("change", runSimulation);
+});
+document.getElementById("sim-compare-btn").addEventListener("click", renderSimCompareTable);
+
+// ===== Suivi de budget =====
+const BUDGET_KEY = "tokencalc-budget";
+const budgetToggle = document.getElementById("budget-toggle");
+const budgetBody = document.getElementById("budget-body");
+const budgetToggleIcon = document.getElementById("budget-toggle-icon");
+const budgetMonthlyInput = document.getElementById("budget-monthly");
+const budgetProviderSelect = document.getElementById("budget-provider");
+const budgetModelSelect = document.getElementById("budget-model");
+const budgetForm = document.getElementById("budget-form");
+const budgetDateInput = document.getElementById("budget-date");
+const budgetInTokensInput = document.getElementById("budget-in-tokens");
+const budgetOutTokensInput = document.getElementById("budget-out-tokens");
+
+function loadBudgetData() {
+  try {
+    const data = JSON.parse(localStorage.getItem(BUDGET_KEY));
+    if (data && typeof data === "object" && Array.isArray(data.entries)) return data;
+  } catch (e) { /* stockage vide ou corrompu */ }
+  return { monthlyBudgetUSD: 50, entries: [] };
+}
+
+function persistBudgetData(data) {
+  try {
+    localStorage.setItem(BUDGET_KEY, JSON.stringify(data));
+  } catch (e) {
+    // Quota dépassé : la sauvegarde échoue silencieusement.
+  }
+}
+
+function populateBudgetProviderSelects() {
+  budgetProviderSelect.innerHTML = "";
+  Object.entries(PROVIDERS).forEach(([key, provider]) => {
+    const opt = document.createElement("option");
+    opt.value = key;
+    opt.textContent = provider.label;
+    budgetProviderSelect.appendChild(opt);
+  });
+  populateBudgetModelSelect();
+}
+
+function populateBudgetModelSelect() {
+  const provider = PROVIDERS[budgetProviderSelect.value];
+  budgetModelSelect.innerHTML = "";
+  provider.models.forEach((m) => {
+    const opt = document.createElement("option");
+    opt.value = m.id;
+    opt.textContent = m.name;
+    budgetModelSelect.appendChild(opt);
+  });
+}
+
+function addBudgetEntry(e) {
+  e.preventDefault();
+  const provider = PROVIDERS[budgetProviderSelect.value];
+  const model = provider.models.find((m) => m.id === budgetModelSelect.value);
+  const inputTokens = Number(budgetInTokensInput.value) || 0;
+  const outputTokens = Number(budgetOutTokensInput.value) || 0;
+  const { priceIn, priceOut } = resolvePricing(model);
+  const cost = computeCost(inputTokens, outputTokens, priceIn, priceOut);
+  const data = loadBudgetData();
+  data.entries.push({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    date: budgetDateInput.value || new Date().toISOString().slice(0, 10),
+    provider: budgetProviderSelect.value,
+    model: model.id,
+    modelName: model.name,
+    inputTokens,
+    outputTokens,
+    costUSD: cost ? cost.total : 0,
+  });
+  persistBudgetData(data);
+  budgetInTokensInput.value = 0;
+  budgetOutTokensInput.value = 0;
+  renderBudgetPanel();
+}
+
+function deleteBudgetEntry(id) {
+  const data = loadBudgetData();
+  data.entries = data.entries.filter((e) => e.id !== id);
+  persistBudgetData(data);
+  renderBudgetPanel();
+}
+
+function computeCurrentMonthTotal(entries) {
+  const now = new Date();
+  const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  return entries.filter((e) => e.date.startsWith(prefix)).reduce((sum, e) => sum + e.costUSD, 0);
+}
+
+function renderBudgetChart(entries) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prefix = `${year}-${String(month + 1).padStart(2, "0")}`;
+  const totalsByDay = new Array(daysInMonth + 1).fill(0);
+  entries.filter((e) => e.date.startsWith(prefix)).forEach((e) => {
+    const day = Number(e.date.slice(8, 10));
+    if (day >= 1 && day <= daysInMonth) totalsByDay[day] += e.costUSD;
+  });
+  const max = Math.max(...totalsByDay, 0.01);
+  const barWidth = 100 / daysInMonth;
+  const bars = totalsByDay.slice(1).map((v, i) => {
+    const h = (v / max) * 100;
+    const x = i * barWidth;
+    return `<rect x="${x.toFixed(2)}%" y="${(100 - h).toFixed(2)}%" width="${(barWidth * 0.8).toFixed(2)}%" height="${h.toFixed(2)}%" fill="var(--accent)"><title>Jour ${i + 1} : ${formatUSD(v)}</title></rect>`;
+  }).join("");
+  document.getElementById("budget-chart").innerHTML = `<svg viewBox="0 0 100 40" preserveAspectRatio="none" style="width:100%;height:80px">${bars}</svg>`;
+}
+
+function renderBudgetPanel() {
+  const data = loadBudgetData();
+  budgetMonthlyInput.value = data.monthlyBudgetUSD;
+
+  const monthTotal = computeCurrentMonthTotal(data.entries);
+  const pct = data.monthlyBudgetUSD > 0 ? Math.min(100, (monthTotal / data.monthlyBudgetUSD) * 100) : 0;
+  const over = monthTotal > data.monthlyBudgetUSD;
+  document.getElementById("budget-summary-text").textContent =
+    `${formatUSD(monthTotal)} dépensés ce mois-ci sur ${formatUSD(data.monthlyBudgetUSD)}${over ? " — budget dépassé" : ""}`;
+  const fill = document.getElementById("budget-progress-fill");
+  fill.style.width = `${pct}%`;
+  fill.classList.toggle("over", over);
+
+  renderBudgetChart(data.entries);
+
+  const list = document.getElementById("budget-entries");
+  const sorted = data.entries.slice().sort((a, b) => b.date.localeCompare(a.date));
+  if (sorted.length === 0) {
+    list.innerHTML = '<div class="panel-empty">Aucune consommation enregistrée pour le moment.</div>';
+    return;
+  }
+  list.innerHTML = "";
+  sorted.forEach((entry) => {
+    const row = document.createElement("div");
+    row.className = "budget-entry";
+    row.innerHTML = `<span>${entry.date} — ${PROVIDERS[entry.provider] ? PROVIDERS[entry.provider].label : entry.provider} (${entry.modelName})</span><strong>${formatUSD(entry.costUSD)}</strong>`;
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "btn small danger";
+    delBtn.textContent = "Supprimer";
+    delBtn.addEventListener("click", () => deleteBudgetEntry(entry.id));
+    row.appendChild(delBtn);
+    list.appendChild(row);
+  });
+}
+
+budgetToggle.addEventListener("click", () => {
+  const open = budgetBody.classList.toggle("open");
+  budgetToggleIcon.textContent = open ? "▴" : "▾";
+});
+budgetProviderSelect.addEventListener("change", populateBudgetModelSelect);
+budgetForm.addEventListener("submit", addBudgetEntry);
+budgetMonthlyInput.addEventListener("change", () => {
+  const data = loadBudgetData();
+  data.monthlyBudgetUSD = Number(budgetMonthlyInput.value) || 0;
+  persistBudgetData(data);
+  renderBudgetPanel();
+});
+
+// ===== Mode résultat brut (intégration scriptable) =====
+function isRawMode() {
+  return new URLSearchParams(location.search).get("raw") === "1";
+}
+
+function renderRawOutput() {
+  document.body.classList.add("raw-mode");
+  const output = {
+    generatedAt: new Date().toISOString(),
+    text: textInput.value,
+    charCount: textInput.value.length,
+    outputLength: Number(outputLengthInput.value) || 0,
+    results: snapshotResults(),
+  };
+  const pre = document.getElementById("raw-json");
+  pre.textContent = JSON.stringify(output, null, 2);
+  document.getElementById("raw-output").style.display = "block";
+  document.getElementById("raw-copy-btn").addEventListener("click", () => {
+    navigator.clipboard.writeText(pre.textContent);
+  });
+}
+
 // ===== Events =====
 textInput.addEventListener("input", (e) => {
   const text = textInput.value;
@@ -1036,10 +1658,22 @@ themeToggle.addEventListener("click", () => {
 async function init() {
   await loadProvidersData();
   resultsSection.innerHTML = "";
-  Object.entries(PROVIDERS).forEach(([key, provider]) => buildCard(key, provider));
+  sortedProviderEntries().forEach(([key, provider]) => buildCard(key, provider));
+
+  visibleProviders = loadVisibilityPrefs() || Object.keys(PROVIDERS);
+  applyVisibility();
+  renderProviderFilters();
+
+  populateSimProviderSelects();
+  populateBudgetProviderSelects();
+  budgetDateInput.value = new Date().toISOString().slice(0, 10);
+
   await restoreFromHash();
   updateAllCards();
   renderHistoryPanel();
+  renderBudgetPanel();
+
+  if (isRawMode()) renderRawOutput();
 }
 
 init();
