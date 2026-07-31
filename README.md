@@ -21,3 +21,7 @@ Aucun build, aucune dépendance à installer — seule ressource externe : le to
 ## Mettre à jour les prix
 
 Éditer [`data/providers.json`](data/providers.json) **et** la copie `FALLBACK_DATA` en tête du `<script>` de `index.html` (utilisée uniquement si le fichier JSON ne peut pas être chargé, par exemple en ouverture locale `file://`), puis commit + push — la page publiée reflète automatiquement la dernière version au prochain chargement.
+
+## Licence
+
+Projet libre et gratuit, publié sous licence [MIT](LICENSE).
