@@ -150,6 +150,23 @@ button { font-family: inherit; cursor: pointer; }
 }
 #theme-toggle:hover { border-color: var(--accent); }
 
+#currency-toggle {
+  height: 2.25rem;
+  padding: 0 .7rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--fg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+#currency-toggle:hover { border-color: var(--accent); }
+#currency-toggle.active { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
 /* ===== Input zone ===== */
 #input-zone {
   background: var(--card-bg);
@@ -539,6 +556,7 @@ body.raw-mode #budget-panel {
       <span class="dot"></span>
       <span id="tokenizer-status-text">Chargement du tokenizer…</span>
     </span>
+    <button id="currency-toggle" type="button" title="Afficher en euros">$ → €</button>
     <button id="theme-toggle" type="button" title="Changer de thème">🌙</button>
   </div>
 </header>
@@ -631,7 +649,7 @@ body.raw-mode #budget-panel {
     </button>
     <div class="panel-body" id="budget-body">
       <div class="field" style="max-width:200px">
-        <label for="budget-monthly">Budget mensuel ($)</label>
+        <label for="budget-monthly" id="budget-monthly-label">Budget mensuel ($)</label>
         <input type="number" id="budget-monthly" min="0" step="1">
       </div>
       <div class="budget-summary">
@@ -671,7 +689,7 @@ body.raw-mode #budget-panel {
 
 <script type="module">
 // ===== Version de l'application (SemVer manuel — voir CHANGELOG.md) =====
-const APP_VERSION = "1.1.0";
+const APP_VERSION = "1.2.0";
 document.getElementById("app-version").textContent = `v${APP_VERSION}`;
 
 // ===== Effort/reasoning output multipliers & providers state (populated from data/providers.json) =====
@@ -679,6 +697,7 @@ let EFFORT_MULTIPLIERS = null;
 let EFFORT_LABELS = null;
 let PROVIDERS = null;
 let usingFallbackData = false;
+let EXCHANGE_RATE_USD_TO_EUR = 0.92;
 
 // Copie de secours utilisée uniquement si le fetch de data/providers.json échoue
 // (ex: ouverture locale en file:// où Chrome bloque fetch() par défaut) ou renvoie
@@ -686,6 +705,8 @@ let usingFallbackData = false;
 // Doit rester synchronisée avec data/providers.json à chaque modification.
 const FALLBACK_DATA = {
   lastUpdated: "2026-07-31",
+  exchangeRateUSDtoEUR: 0.8707,
+  exchangeRateVerifiedOn: "2026-07-31",
   effortMultipliers: { minimal: 0.7, low: 1, medium: 1.5, high: 2.5, max: 4, standard: 1 },
   effortLabels: { minimal: "Minimal", low: "Faible", medium: "Moyen", high: "Élevé", max: "Maximum", standard: "Standard" },
   providers: {
@@ -776,6 +797,7 @@ function applyData(data, isFallback) {
   EFFORT_LABELS = data.effortLabels;
   PROVIDERS = data.providers;
   usingFallbackData = isFallback;
+  if (typeof data.exchangeRateUSDtoEUR === "number") EXCHANGE_RATE_USD_TO_EUR = data.exchangeRateUSDtoEUR;
 
   const lastUpdatedText = document.getElementById("last-updated-text");
   lastUpdatedText.textContent = isFallback
@@ -887,10 +909,18 @@ function computeCost(inputTokens, outputTokens, priceIn, priceOut) {
   return { costIn, costOut, total: costIn + costOut };
 }
 
-function formatUSD(value) {
-  if (value == null) return "—";
-  if (value < 0.01 && value > 0) return "< 0,01 $";
-  return value.toLocaleString("fr-FR", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
+let displayCurrency = "USD";
+
+function convertFromUSD(valueUSD) {
+  return displayCurrency === "EUR" ? valueUSD * EXCHANGE_RATE_USD_TO_EUR : valueUSD;
+}
+
+function formatUSD(valueUSD) {
+  if (valueUSD == null) return "—";
+  const value = convertFromUSD(valueUSD);
+  const symbol = displayCurrency === "EUR" ? "€" : "$";
+  if (value < 0.01 && value > 0) return `< 0,01 ${symbol}`;
+  return value.toLocaleString("fr-FR", { style: "currency", currency: displayCurrency, maximumFractionDigits: 2 });
 }
 
 function formatTokens(n) {
@@ -1850,7 +1880,7 @@ function renderBudgetChart(entries) {
 
 function renderBudgetPanel() {
   const data = loadBudgetData();
-  budgetMonthlyInput.value = data.monthlyBudgetUSD;
+  budgetMonthlyInput.value = Math.round(convertFromUSD(data.monthlyBudgetUSD) * 100) / 100;
 
   const monthTotal = computeCurrentMonthTotal(data.entries);
   const pct = data.monthlyBudgetUSD > 0 ? Math.min(100, (monthTotal / data.monthlyBudgetUSD) * 100) : 0;
@@ -1892,7 +1922,8 @@ budgetProviderSelect.addEventListener("change", populateBudgetModelSelect);
 budgetForm.addEventListener("submit", addBudgetEntry);
 budgetMonthlyInput.addEventListener("change", () => {
   const data = loadBudgetData();
-  data.monthlyBudgetUSD = Number(budgetMonthlyInput.value) || 0;
+  const entered = Number(budgetMonthlyInput.value) || 0;
+  data.monthlyBudgetUSD = displayCurrency === "EUR" ? entered / EXCHANGE_RATE_USD_TO_EUR : entered;
   persistBudgetData(data);
   renderBudgetPanel();
 });
@@ -1951,6 +1982,27 @@ applyTheme(savedTheme);
 themeToggle.addEventListener("click", () => {
   const current = document.documentElement.getAttribute("data-theme");
   applyTheme(current === "dark" ? "light" : "dark");
+});
+
+// ===== Devise d'affichage ($/€) =====
+const currencyToggle = document.getElementById("currency-toggle");
+function applyCurrency(currency) {
+  displayCurrency = currency;
+  currencyToggle.textContent = currency === "EUR" ? "€ → $" : "$ → €";
+  currencyToggle.title = currency === "EUR" ? "Afficher en dollars" : "Afficher en euros";
+  currencyToggle.classList.toggle("active", currency === "EUR");
+  localStorage.setItem("tokencalc-currency", currency);
+  document.getElementById("budget-monthly-label").textContent = `Budget mensuel (${currency === "EUR" ? "€" : "$"})`;
+  if (PROVIDERS) {
+    updateAllCards();
+    renderHistoryPanel();
+    renderBudgetPanel();
+  }
+}
+const savedCurrency = localStorage.getItem("tokencalc-currency") || "USD";
+applyCurrency(savedCurrency);
+currencyToggle.addEventListener("click", () => {
+  applyCurrency(displayCurrency === "USD" ? "EUR" : "USD");
 });
 
 // ===== Service worker (cache offline, persiste tant que le navigateur le garde) =====

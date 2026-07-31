@@ -9,6 +9,12 @@ et ce projet adhère à un schéma de [versionnage sémantique](https://semver.o
 - **MINOR** : nouvelle fonctionnalité visible (nouveau fournisseur, nouveau panneau, nouvelle vue).
 - **PATCH** : mise à jour de prix, correction de bug, ajustement de `proxyFactor`, texte/CSS.
 
+## [1.2.0] - 2026-07-31
+
+### Ajouté
+- Bouton de conversion d'affichage $ → € dans l'en-tête : tous les coûts (cartes modèles, vue comparative, historique, simulateur, suivi de budget) peuvent être affichés en euros. Le taux de change (`exchangeRateUSDtoEUR`) est défini dans `data/providers.json` avec sa date de vérification, et le choix de devise est mémorisé (`localStorage`). Les montants restent stockés en dollars en interne ; seule la présentation change.
+- Mise à jour automatique quotidienne du taux de change (CI GitHub Actions, `scripts/update-exchange-rate.js`) via l'API gratuite Frankfurter.app (taux officiels Banque Centrale Européenne) — commit automatique uniquement si le taux a changé. Les prix des modèles IA restent en revanche vérifiés manuellement (pas d'API fiable équivalente côté fournisseurs).
+
 ## [1.1.0] - 2026-07-31
 
 ### Ajouté
