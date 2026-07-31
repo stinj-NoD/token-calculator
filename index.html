@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calculateur de tokens IA — 2026</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f1115'/%3E%3Crect x='4' y='13' width='8' height='8' rx='2' fill='%237c8cff'/%3E%3Crect x='13' y='9' width='8' height='8' rx='2' fill='%237c8cff' opacity='.75'/%3E%3Crect x='22' y='5' width='6' height='6' rx='1.5' fill='%237c8cff' opacity='.5'/%3E%3C/svg%3E">
 <script src="https://cdn.jsdelivr.net/npm/gpt-tokenizer@3.4.0/dist/o200k_base.js"></script>
 <style>
 /* ===== Reset & base ===== */
@@ -1653,6 +1654,11 @@ themeToggle.addEventListener("click", () => {
   const current = document.documentElement.getAttribute("data-theme");
   applyTheme(current === "dark" ? "light" : "dark");
 });
+
+// ===== Service worker (cache offline, persiste tant que le navigateur le garde) =====
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  navigator.serviceWorker.register("./sw.js").catch(() => {});
+}
 
 // ===== Init =====
 async function init() {
