@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculateur de tokens IA — 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/gpt-tokenizer@3.4.0/dist/o200k_base.js"></script>
+<style>
+/* ===== Reset & base ===== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.5;
+  transition: background .2s, color .2s;
+}
+
+/* ===== Theme tokens ===== */
+:root, [data-theme="dark"] {
+  --bg: #0f1115;
+  --bg-elev: #161923;
+  --card-bg: #1a1d29;
+  --fg: #e8e9ee;
+  --fg-muted: #9598a8;
+  --border: #2a2e3d;
+  --accent: #7c8cff;
+  --accent-fg: #0f1115;
+  --badge-exact-bg: #163a2b;
+  --badge-exact-fg: #4ade80;
+  --badge-proxy-bg: #3a2f16;
+  --badge-proxy-fg: #fbbf24;
+  --input-bg: #12141c;
+  --danger: #f87171;
+}
+[data-theme="light"] {
+  --bg: #f5f6fa;
+  --bg-elev: #ffffff;
+  --card-bg: #ffffff;
+  --fg: #1a1d29;
+  --fg-muted: #5c6070;
+  --border: #dfe1ea;
+  --accent: #4f5fd6;
+  --accent-fg: #ffffff;
+  --badge-exact-bg: #e2f6e9;
+  --badge-exact-fg: #16803c;
+  --badge-proxy-bg: #fdf0dc;
+  --badge-proxy-fg: #92650b;
+  --input-bg: #f0f1f6;
+  --danger: #dc2626;
+}
+
+/* ===== Layout ===== */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elev);
+  flex-wrap: wrap;
+}
+header .header-left { display: flex; flex-direction: column; gap: .2rem; }
+header h1 { font-size: 1.25rem; font-weight: 600; }
+header .last-updated { font-size: .78rem; color: var(--fg-muted); }
+header .header-right { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+footer {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  color: var(--fg-muted);
+  font-size: .8rem;
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+}
+
+/* ===== Status pill ===== */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .35rem .7rem;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 500;
+  background: var(--badge-proxy-bg);
+  color: var(--badge-proxy-fg);
+}
+.status-pill.ready { background: var(--badge-exact-bg); color: var(--badge-exact-fg); }
+.status-pill .dot { width: .5rem; height: .5rem; border-radius: 50%; background: currentColor; }
+
+/* ===== Buttons (shared) ===== */
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+.btn {
+  background: var(--card-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .5rem .85rem;
+  font-size: .85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+.btn:hover { border-color: var(--accent); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn:disabled:hover { border-color: var(--border); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+#theme-toggle {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--fg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  padding: 0;
+}
+#theme-toggle:hover { border-color: var(--accent); }
+
+/* ===== Input zone ===== */
+#input-zone {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+#input-zone.drag-over { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--card-bg)); }
+textarea {
+  width: 100%;
+  min-height: 160px;
+  resize: vertical;
+  background: var(--input-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .85rem;
+  font-family: inherit;
+  font-size: .95rem;
+}
+textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.input-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .75rem;
+  color: var(--fg-muted);
+  font-size: .85rem;
+}
+
+.input-toolbar {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.output-length-row {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  flex-wrap: wrap;
+}
+.output-length-row label { font-size: .85rem; color: var(--fg-muted); white-space: nowrap; }
+.output-length-row input {
+  width: 140px;
+  background: var(--input-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .45rem .6rem;
+  font-family: inherit;
+  font-size: .9rem;
+}
+
+/* ===== Results / cards ===== */
+#results {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.loading-note, .error-note {
+  color: var(--fg-muted);
+  font-size: .9rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.25rem;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin-bottom: 1rem;
+}
+.card-header h2 { font-size: 1.05rem; font-weight: 600; }
+.card-badges { display: flex; gap: .4rem; flex-wrap: wrap; }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: .25rem .6rem;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge.exact { background: var(--badge-exact-bg); color: var(--badge-exact-fg); }
+.badge.proxy { background: var(--badge-proxy-bg); color: var(--badge-proxy-fg); }
+
+.card-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+.field label {
+  display: block;
+  font-size: .78rem;
+  color: var(--fg-muted);
+  margin-bottom: .3rem;
+}
+.field select {
+  width: 100%;
+  background: var(--input-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .5rem .6rem;
+  font-family: inherit;
+  font-size: .9rem;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: .75rem;
+}
+.result-item {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .7rem .8rem;
+}
+.result-item .label { font-size: .72rem; color: var(--fg-muted); margin-bottom: .3rem; }
+.result-item .value { font-size: 1.05rem; font-weight: 600; }
+.result-item.total { background: color-mix(in srgb, var(--accent) 14%, var(--card-bg)); border-color: var(--accent); }
+.result-item.total .value { color: var(--accent); }
+
+.card-footnote {
+  margin-top: .9rem;
+  font-size: .76rem;
+  color: var(--fg-muted);
+}
+
+/* ===== Actions bar ===== */
+#actions-bar {
+  display: flex;
+  gap: .6rem;
+  flex-wrap: wrap;
+}
+
+/* ===== History panel ===== */
+#history-panel {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+#history-toggle {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--fg);
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: .95rem;
+  font-weight: 600;
+}
+#history-body { padding: 0 1.25rem 1.25rem; display: none; flex-direction: column; gap: .6rem; }
+#history-body.open { display: flex; }
+.history-empty { color: var(--fg-muted); font-size: .85rem; }
+.history-actions { display: flex; justify-content: flex-end; }
+.history-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: .75rem;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .7rem .9rem;
+  flex-wrap: wrap;
+}
+.history-entry-info { flex: 1; min-width: 200px; }
+.history-entry-date { font-size: .78rem; color: var(--fg-muted); }
+.history-entry-excerpt { font-size: .85rem; margin-top: .2rem; overflow-wrap: anywhere; }
+.history-entry-meta { font-size: .78rem; color: var(--fg-muted); margin-top: .2rem; }
+.history-entry-actions { display: flex; gap: .4rem; }
+.btn.small { padding: .35rem .6rem; font-size: .78rem; }
+.btn.danger { color: var(--danger); }
+
+@media (max-width: 640px) {
+  .card-controls { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <h1>Calculateur de tokens IA — modèles 2026</h1>
+    <span class="last-updated" id="last-updated-text"></span>
+  </div>
+  <div class="header-right">
+    <span id="tokenizer-status" class="status-pill">
+      <span class="dot"></span>
+      <span id="tokenizer-status-text">Chargement du tokenizer…</span>
+    </span>
+    <button id="theme-toggle" type="button" title="Changer de thème">🌙</button>
+  </div>
+</header>
+
+<main>
+  <section id="input-zone">
+    <div class="input-toolbar">
+      <span style="font-size:.85rem;color:var(--fg-muted)">Collez du texte ou importez un fichier</span>
+      <div style="display:flex;gap:.5rem">
+        <button type="button" class="btn" id="import-btn">📁 Importer un fichier</button>
+        <input type="file" id="file-input" multiple hidden accept=".txt,.md,.js,.py,.json,.ts,.jsx,.tsx,.java,.c,.cpp,.cs,.go,.rb,.php,.html,.css,.yml,.yaml,.sh">
+      </div>
+    </div>
+    <textarea id="text-input" placeholder="Collez votre texte ici, ou glissez-déposez un fichier…"></textarea>
+    <div class="input-meta">
+      <span id="char-word-count">0 caractère · 0 mot</span>
+      <button type="button" class="btn small" id="save-history-btn">💾 Sauvegarder ce calcul</button>
+    </div>
+    <div class="output-length-row">
+      <label for="output-length">Longueur de sortie estimée (tokens)</label>
+      <input type="number" id="output-length" min="0" step="1" value="0">
+    </div>
+  </section>
+
+  <section id="results">
+    <div class="loading-note">Chargement des données de prix…</div>
+  </section>
+
+  <section id="actions-bar">
+    <button type="button" class="btn" id="export-json-btn">⬇️ Exporter JSON</button>
+    <button type="button" class="btn" id="export-csv-btn">⬇️ Exporter CSV</button>
+    <button type="button" class="btn" id="copy-link-btn">🔗 Copier le lien</button>
+  </section>
+
+  <section id="history-panel">
+    <button type="button" id="history-toggle">
+      <span id="history-toggle-label">Historique (0)</span>
+      <span id="history-toggle-icon">▾</span>
+    </button>
+    <div id="history-body"></div>
+  </section>
+</main>
+
+<footer>
+  <span id="data-footer-note">Tous les chiffres (tokens, coûts) sont des estimations à but comparatif. Seul le comptage ChatGPT/Codex utilise le tokenizer OpenAI réel (o200k_base) ; les autres fournisseurs n'exposent pas de tokenizer public et sont approximés via ce même tokenizer comme proxy.</span>
+</footer>
+
+<script type="module">
+// ===== Effort/reasoning output multipliers & providers state (populated from data/providers.json) =====
+let EFFORT_MULTIPLIERS = null;
+let EFFORT_LABELS = null;
+let PROVIDERS = null;
+let usingFallbackData = false;
+
+// Copie de secours utilisée uniquement si le fetch de data/providers.json échoue
+// (ex: ouverture locale en file:// où Chrome bloque fetch() par défaut) ou renvoie
+// un JSON invalide -- garantit que l'usage local par double-clic continue de fonctionner.
+const FALLBACK_DATA = {
+  lastUpdated: "2026-07-31",
+  effortMultipliers: { minimal: 0.7, low: 1, medium: 1.5, high: 2.5, max: 4 },
+  effortLabels: { minimal: "Minimal", low: "Faible", medium: "Moyen", high: "Élevé", max: "Maximum" },
+  providers: {
+    claude: {
+      label: "Claude / Claude Code", tokenizerMode: "proxy", proxyFactor: 1.05,
+      efforts: ["low", "medium", "high", "max"], effortLabel: "Niveau d'effort",
+      models: [
+        { id: "opus-5", name: "Opus 5", priceIn: 5, priceOut: 25 },
+        { id: "sonnet-5", name: "Sonnet 5", priceIn: 2, priceOut: 10, priceInAfter: 3, priceOutAfter: 15, priceChangeDate: "2026-08-31" },
+        { id: "haiku-4-5", name: "Haiku 4.5", priceIn: 1, priceOut: 5 },
+        { id: "fable-5", name: "Fable 5", priceIn: 10, priceOut: 50 },
+      ],
+    },
+    chatgpt: {
+      label: "ChatGPT / Codex", tokenizerMode: "exact",
+      efforts: ["minimal", "low", "medium", "high"], effortLabel: "Niveau d'effort",
+      models: [
+        { id: "gpt-5-6-sol", name: "GPT-5.6 Sol (flagship)", priceIn: 5, priceOut: 30 },
+        { id: "gpt-5-6-terra", name: "GPT-5.6 Terra (équilibré)", priceIn: 2.5, priceOut: 15 },
+        { id: "gpt-5-6-luna", name: "GPT-5.6 Luna (économique)", priceIn: 1, priceOut: 6 },
+        { id: "gpt-5-5", name: "GPT-5.5 (génération précédente)", priceIn: null, priceOut: null },
+      ],
+    },
+    gemini: {
+      label: "Gemini", tokenizerMode: "proxy", proxyFactor: 1.0,
+      efforts: ["low", "medium", "high", "max"], effortLabel: "Budget de réflexion",
+      models: [
+        { id: "gemini-3-6-flash", name: "Gemini 3.6 Flash", priceIn: 1.5, priceOut: 7.5 },
+        { id: "gemini-3-5-flash", name: "Gemini 3.5 Flash", priceIn: 1.5, priceOut: 9.0 },
+        { id: "gemini-3-flash", name: "Gemini 3 Flash", priceIn: 0.5, priceOut: 3.0 },
+        { id: "gemini-3-1-flash-lite", name: "Gemini 3.1 Flash-Lite", priceIn: 0.25, priceOut: 1.5 },
+        { id: "gemini-3-1-pro", name: "Gemini 3.1 Pro", priceIn: 3.5, priceOut: 16, estimated: true },
+      ],
+    },
+    copilot: {
+      label: "GitHub Copilot", tokenizerMode: "mixed",
+      efforts: ["low", "medium", "high"], effortLabel: "Niveau d'effort",
+      models: [
+        { id: "gpt-5-3-codex", name: "GPT-5.3-Codex (défaut)", priceIn: null, priceOut: null, tokenizer: "exact" },
+        { id: "opus-5-copilot", name: "Claude Opus 5", priceIn: 5, priceOut: 25, tokenizer: "proxy" },
+        { id: "grok-4-5", name: "Grok 4.5", priceIn: null, priceOut: null, tokenizer: "proxy" },
+        { id: "kimi-k2-7", name: "Kimi K2.7", priceIn: null, priceOut: null, tokenizer: "proxy" },
+      ],
+    },
+  },
+};
+
+async function loadProvidersData() {
+  try {
+    const res = await fetch("./data/providers.json");
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    if (!data.providers || Object.keys(data.providers).length === 0) throw new Error("empty providers");
+    applyData(data, false);
+  } catch (e) {
+    applyData(FALLBACK_DATA, true);
+  }
+}
+
+function applyData(data, isFallback) {
+  EFFORT_MULTIPLIERS = data.effortMultipliers;
+  EFFORT_LABELS = data.effortLabels;
+  PROVIDERS = data.providers;
+  usingFallbackData = isFallback;
+
+  const lastUpdatedText = document.getElementById("last-updated-text");
+  lastUpdatedText.textContent = isFallback
+    ? "Données de secours embarquées — ouvrez via GitHub Pages pour les prix à jour"
+    : `Données mises à jour le ${data.lastUpdated}`;
+}
+
+// ===== Tokenizer loading =====
+let tokenizerReady = false;
+let encodeFn = null;
+try {
+  if (window.GPTTokenizer_o200k_base && typeof window.GPTTokenizer_o200k_base.encode === "function") {
+    encodeFn = window.GPTTokenizer_o200k_base.encode;
+    tokenizerReady = true;
+  }
+} catch (e) {
+  tokenizerReady = false;
+}
+
+const statusPill = document.getElementById("tokenizer-status");
+const statusText = document.getElementById("tokenizer-status-text");
+if (tokenizerReady) {
+  statusPill.classList.add("ready");
+  statusText.textContent = "Tokenizer o200k_base précis";
+} else {
+  statusText.textContent = "Estimation ~4 car./token (hors ligne)";
+}
+
+function estimateTokensFallback(text) {
+  return text.length === 0 ? 0 : Math.ceil(text.length / 4);
+}
+
+function getTokenCount(text, mode, proxyFactor) {
+  if (!text) return 0;
+  if (!tokenizerReady) return estimateTokensFallback(text);
+  const base = encodeFn(text).length;
+  return mode === "exact" ? base : Math.round(base * (proxyFactor || 1));
+}
+
+function resolvePricing(model) {
+  if (model.priceChangeDate && new Date() > new Date(model.priceChangeDate)) {
+    return { priceIn: model.priceInAfter, priceOut: model.priceOutAfter };
+  }
+  return { priceIn: model.priceIn, priceOut: model.priceOut };
+}
+
+function computeCost(inputTokens, outputTokens, priceIn, priceOut) {
+  if (priceIn == null || priceOut == null) return null;
+  const costIn = (inputTokens / 1_000_000) * priceIn;
+  const costOut = (outputTokens / 1_000_000) * priceOut;
+  return { costIn, costOut, total: costIn + costOut };
+}
+
+function formatUSD(value) {
+  if (value == null) return "—";
+  if (value < 0.01 && value > 0) return "< 0,01 $";
+  return value.toLocaleString("fr-FR", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
+}
+
+function formatTokens(n) {
+  return n.toLocaleString("fr-FR");
+}
+
+function debounce(fn, delay) {
+  let timer = null;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
+}
+
+// ===== DOM refs =====
+const resultsSection = document.getElementById("results");
+const textInput = document.getElementById("text-input");
+const charWordCount = document.getElementById("char-word-count");
+const outputLengthInput = document.getElementById("output-length");
+let outputLengthTouched = false;
+const cardRefs = {};
+
+function buildCard(providerKey, provider) {
+  const card = document.createElement("div");
+  card.className = "card";
+
+  const header = document.createElement("div");
+  header.className = "card-header";
+  const title = document.createElement("h2");
+  title.textContent = provider.label;
+  const badges = document.createElement("div");
+  badges.className = "card-badges";
+  header.appendChild(title);
+  header.appendChild(badges);
+
+  const controls = document.createElement("div");
+  controls.className = "card-controls";
+
+  const modelField = document.createElement("div");
+  modelField.className = "field";
+  const modelLabel = document.createElement("label");
+  modelLabel.textContent = "Modèle";
+  const modelSelect = document.createElement("select");
+  provider.models.forEach((m) => {
+    const opt = document.createElement("option");
+    opt.value = m.id;
+    opt.textContent = m.name;
+    modelSelect.appendChild(opt);
+  });
+  modelField.appendChild(modelLabel);
+  modelField.appendChild(modelSelect);
+
+  const effortField = document.createElement("div");
+  effortField.className = "field";
+  const effortLabel = document.createElement("label");
+  effortLabel.textContent = provider.effortLabel;
+  const effortSelect = document.createElement("select");
+  provider.efforts.forEach((e) => {
+    const opt = document.createElement("option");
+    opt.value = e;
+    opt.textContent = EFFORT_LABELS[e];
+    if (e === "medium") opt.selected = true;
+    effortSelect.appendChild(opt);
+  });
+  effortField.appendChild(effortLabel);
+  effortField.appendChild(effortSelect);
+
+  controls.appendChild(modelField);
+  controls.appendChild(effortField);
+
+  const grid = document.createElement("div");
+  grid.className = "results-grid";
+  const items = {};
+  [
+    ["inTokens", "Tokens d'entrée"],
+    ["outTokens", "Tokens de sortie estimés"],
+    ["costIn", "Coût entrée estimé"],
+    ["costOut", "Coût sortie estimé"],
+    ["total", "Coût total estimé"],
+  ].forEach(([key, label]) => {
+    const item = document.createElement("div");
+    item.className = "result-item" + (key === "total" ? " total" : "");
+    const l = document.createElement("div");
+    l.className = "label";
+    l.textContent = label;
+    const v = document.createElement("div");
+    v.className = "value";
+    v.textContent = "—";
+    item.appendChild(l);
+    item.appendChild(v);
+    grid.appendChild(item);
+    items[key] = v;
+  });
+
+  const footnote = document.createElement("div");
+  footnote.className = "card-footnote";
+  footnote.style.display = "none";
+  footnote.textContent = "Estimation basée sur le tokenizer OpenAI o200k_base comme proxy, pas de tokenizer public pour ce fournisseur.";
+
+  card.appendChild(header);
+  card.appendChild(controls);
+  card.appendChild(grid);
+  card.appendChild(footnote);
+  resultsSection.appendChild(card);
+
+  cardRefs[providerKey] = { modelSelect, effortSelect, items, badges, footnote };
+
+  modelSelect.addEventListener("change", () => updateCard(providerKey));
+  effortSelect.addEventListener("change", () => updateCard(providerKey));
+}
+
+function updateCard(providerKey) {
+  const provider = PROVIDERS[providerKey];
+  const ref = cardRefs[providerKey];
+  const model = provider.models.find((m) => m.id === ref.modelSelect.value);
+  const effort = ref.effortSelect.value;
+
+  const isMixed = provider.tokenizerMode === "mixed";
+  const modelTokenizerMode = isMixed ? model.tokenizer : provider.tokenizerMode;
+  const proxyFactor = isMixed ? 1.0 : provider.proxyFactor;
+
+  ref.badges.innerHTML = "";
+  const modeBadge = document.createElement("span");
+  if (!tokenizerReady) {
+    modeBadge.className = "badge proxy";
+    modeBadge.textContent = "Estimation hors ligne";
+  } else if (modelTokenizerMode === "exact") {
+    modeBadge.className = "badge exact";
+    modeBadge.textContent = "Tokenizer exact";
+  } else {
+    modeBadge.className = "badge proxy";
+    modeBadge.textContent = "Estimation";
+  }
+  ref.badges.appendChild(modeBadge);
+  if (model.estimated) {
+    const priceBadge = document.createElement("span");
+    priceBadge.className = "badge proxy";
+    priceBadge.textContent = "Prix estimé";
+    ref.badges.appendChild(priceBadge);
+  }
+  ref.footnote.style.display = (tokenizerReady && modelTokenizerMode === "exact") ? "none" : "block";
+
+  const text = textInput.value;
+  const inputTokens = getTokenCount(text, modelTokenizerMode, proxyFactor);
+  const baseOutput = Number(outputLengthInput.value) || 0;
+  const outputTokens = Math.round(baseOutput * EFFORT_MULTIPLIERS[effort]);
+
+  const { priceIn, priceOut } = resolvePricing(model);
+  const cost = computeCost(inputTokens, outputTokens, priceIn, priceOut);
+
+  ref.items.inTokens.textContent = formatTokens(inputTokens);
+  ref.items.outTokens.textContent = formatTokens(outputTokens);
+  if (cost) {
+    ref.items.costIn.textContent = formatUSD(cost.costIn);
+    ref.items.costOut.textContent = formatUSD(cost.costOut);
+    ref.items.total.textContent = formatUSD(cost.total);
+  } else {
+    ref.items.costIn.textContent = "Non communiqué";
+    ref.items.costOut.textContent = "Non communiqué";
+    ref.items.total.textContent = "Non communiqué";
+  }
+}
+
+function updateAllCards() {
+  Object.keys(PROVIDERS).forEach(updateCard);
+}
+
+function snapshotResults() {
+  return Object.entries(PROVIDERS).map(([key, provider]) => {
+    const ref = cardRefs[key];
+    const model = provider.models.find((m) => m.id === ref.modelSelect.value);
+    const effort = ref.effortSelect.value;
+    return {
+      provider: key,
+      providerLabel: provider.label,
+      model: model.id,
+      modelName: model.name,
+      effort,
+      inputTokens: ref.items.inTokens.textContent,
+      outputTokens: ref.items.outTokens.textContent,
+      costIn: ref.items.costIn.textContent,
+      costOut: ref.items.costOut.textContent,
+      totalCost: ref.items.total.textContent,
+    };
+  });
+}
+
+// ===== Import de fichiers =====
+const importBtn = document.getElementById("import-btn");
+const fileInput = document.getElementById("file-input");
+const inputZone = document.getElementById("input-zone");
+
+async function handleFileImport(fileList) {
+  const files = Array.from(fileList);
+  if (files.length === 0) return;
+  const totalSize = files.reduce((sum, f) => sum + f.size, 0);
+  if (totalSize > 2 * 1024 * 1024) {
+    if (!confirm("Le contenu importé dépasse 2 Mo, ce qui peut ralentir le calcul. Continuer ?")) return;
+  }
+  const contents = await Promise.all(files.map((f) => f.text()));
+  if (files.length === 1) {
+    textInput.value = contents[0];
+  } else {
+    textInput.value = files.map((f, i) => `--- ${f.name} ---\n\n${contents[i]}`).join("\n\n");
+  }
+  textInput.dispatchEvent(new Event("input"));
+}
+
+importBtn.addEventListener("click", () => fileInput.click());
+fileInput.addEventListener("change", () => {
+  handleFileImport(fileInput.files);
+  fileInput.value = "";
+});
+inputZone.addEventListener("dragover", (e) => { e.preventDefault(); inputZone.classList.add("drag-over"); });
+inputZone.addEventListener("dragleave", () => inputZone.classList.remove("drag-over"));
+inputZone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  inputZone.classList.remove("drag-over");
+  handleFileImport(e.dataTransfer.files);
+});
+
+// ===== Export JSON / CSV =====
+function downloadBlob(content, mime, filename) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportJSON() {
+  const data = {
+    generatedAt: new Date().toISOString(),
+    text: textInput.value,
+    charCount: textInput.value.length,
+    outputLength: Number(outputLengthInput.value) || 0,
+    results: snapshotResults(),
+  };
+  downloadBlob(JSON.stringify(data, null, 2), "application/json", `tokencalc-export-${Date.now()}.json`);
+}
+
+function csvEscape(value) {
+  const str = String(value);
+  return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+}
+
+function exportCSV() {
+  const rows = [
+    ["Provider", "Modèle", "Effort", "Tokens entrée", "Tokens sortie", "Coût entrée", "Coût sortie", "Coût total"],
+    ...snapshotResults().map((r) => [r.providerLabel, r.modelName, r.effort, r.inputTokens, r.outputTokens, r.costIn, r.costOut, r.totalCost]),
+  ];
+  const csv = rows.map((row) => row.map(csvEscape).join(",")).join("\n");
+  downloadBlob(csv, "text/csv;charset=utf-8", `tokencalc-export-${Date.now()}.csv`);
+}
+
+document.getElementById("export-json-btn").addEventListener("click", exportJSON);
+document.getElementById("export-csv-btn").addEventListener("click", exportCSV);
+
+// ===== Lien partageable =====
+const copyLinkBtn = document.getElementById("copy-link-btn");
+
+async function encodeShareState() {
+  const state = {
+    t: textInput.value,
+    o: Number(outputLengthInput.value) || 0,
+    s: Object.fromEntries(Object.entries(cardRefs).map(([k, ref]) => [k, [ref.modelSelect.value, ref.effortSelect.value]])),
+  };
+  const json = JSON.stringify(state);
+  if (typeof CompressionStream === "function") {
+    const stream = new Blob([json]).stream().pipeThrough(new CompressionStream("gzip"));
+    const buf = await new Response(stream).arrayBuffer();
+    return "gz:" + btoa(String.fromCharCode(...new Uint8Array(buf)));
+  }
+  return "raw:" + btoa(encodeURIComponent(json));
+}
+
+async function decodeShareState(hash) {
+  const raw = decodeURIComponent(hash.replace(/^#/, ""));
+  const [kind, payload] = [raw.slice(0, raw.indexOf(":")), raw.slice(raw.indexOf(":") + 1)];
+  const bytes = Uint8Array.from(atob(payload), (c) => c.charCodeAt(0));
+  if (kind === "gz") {
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+    const buf = await new Response(stream).arrayBuffer();
+    return JSON.parse(new TextDecoder().decode(buf));
+  }
+  return JSON.parse(decodeURIComponent(atob(payload)));
+}
+
+async function copyShareLink() {
+  const encoded = await encodeShareState();
+  const url = `${location.origin}${location.pathname}#${encoded}`;
+  if (url.length > 1800) {
+    alert("Texte trop long pour un lien partageable, utilisez l'export JSON.");
+    return;
+  }
+  await navigator.clipboard.writeText(url);
+  copyLinkBtn.textContent = "✅ Lien copié";
+  setTimeout(() => { copyLinkBtn.textContent = "🔗 Copier le lien"; }, 2000);
+}
+
+copyLinkBtn.addEventListener("click", copyShareLink);
+
+async function restoreFromHash() {
+  if (!location.hash || location.hash.length < 2) return;
+  try {
+    const state = await decodeShareState(location.hash);
+    textInput.value = state.t || "";
+    outputLengthInput.value = state.o || 0;
+    outputLengthTouched = true;
+    Object.entries(state.s || {}).forEach(([key, [modelId, effort]]) => {
+      const ref = cardRefs[key];
+      if (!ref) return;
+      ref.modelSelect.value = modelId;
+      ref.effortSelect.value = effort;
+    });
+    textInput.dispatchEvent(new Event("input", { skipOutputAutofill: true }));
+  } catch (e) {
+    // Lien invalide ou corrompu : on ignore silencieusement et on garde l'état par défaut.
+  }
+}
+
+// ===== Historique =====
+const HISTORY_KEY = "tokencalc-history";
+const HISTORY_LIMIT = 50;
+const historyToggle = document.getElementById("history-toggle");
+const historyToggleLabel = document.getElementById("history-toggle-label");
+const historyToggleIcon = document.getElementById("history-toggle-icon");
+const historyBody = document.getElementById("history-body");
+const saveHistoryBtn = document.getElementById("save-history-btn");
+
+function loadHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function persistHistory(entries) {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(entries));
+  } catch (e) {
+    // Quota dépassé ou stockage indisponible : on abandonne silencieusement la sauvegarde.
+  }
+}
+
+function saveHistoryEntry() {
+  const text = textInput.value;
+  if (!text.trim()) return;
+  const entries = loadHistory();
+  const entry = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    timestamp: new Date().toISOString(),
+    textExcerpt: text.slice(0, 300),
+    textFull: text.length < 5000 ? text : null,
+    charCount: text.length,
+    outputLength: Number(outputLengthInput.value) || 0,
+    results: snapshotResults(),
+  };
+  entries.push(entry);
+  while (entries.length > HISTORY_LIMIT) entries.shift();
+  persistHistory(entries);
+  renderHistoryPanel();
+}
+
+function deleteHistoryEntry(id) {
+  persistHistory(loadHistory().filter((e) => e.id !== id));
+  renderHistoryPanel();
+}
+
+function clearHistory() {
+  if (!confirm("Effacer tout l'historique ?")) return;
+  persistHistory([]);
+  renderHistoryPanel();
+}
+
+function restoreFromHistoryEntry(entry) {
+  if (entry.textFull != null) {
+    textInput.value = entry.textFull;
+  } else {
+    alert("Le texte complet n'a pas été conservé pour ce calcul (trop long) ; seul l'extrait est disponible.");
+    textInput.value = entry.textExcerpt;
+  }
+  outputLengthInput.value = entry.outputLength;
+  outputLengthTouched = true;
+  entry.results.forEach((r) => {
+    const ref = cardRefs[r.provider];
+    if (!ref) return;
+    ref.modelSelect.value = r.model;
+    ref.effortSelect.value = r.effort;
+  });
+  textInput.dispatchEvent(new Event("input"));
+}
+
+function renderHistoryPanel() {
+  const entries = loadHistory().slice().reverse();
+  historyToggleLabel.textContent = `Historique (${entries.length})`;
+  historyBody.innerHTML = "";
+
+  if (entries.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "history-empty";
+    empty.textContent = "Aucun calcul sauvegardé pour le moment.";
+    historyBody.appendChild(empty);
+    return;
+  }
+
+  const actions = document.createElement("div");
+  actions.className = "history-actions";
+  const clearBtn = document.createElement("button");
+  clearBtn.type = "button";
+  clearBtn.className = "btn small danger";
+  clearBtn.textContent = "Tout effacer";
+  clearBtn.addEventListener("click", clearHistory);
+  actions.appendChild(clearBtn);
+  historyBody.appendChild(actions);
+
+  entries.forEach((entry) => {
+    const row = document.createElement("div");
+    row.className = "history-entry";
+
+    const info = document.createElement("div");
+    info.className = "history-entry-info";
+    const date = document.createElement("div");
+    date.className = "history-entry-date";
+    date.textContent = new Date(entry.timestamp).toLocaleString("fr-FR");
+    const excerpt = document.createElement("div");
+    excerpt.className = "history-entry-excerpt";
+    excerpt.textContent = entry.textExcerpt;
+    const meta = document.createElement("div");
+    meta.className = "history-entry-meta";
+    meta.textContent = `${formatTokens(entry.charCount)} caractères`;
+    info.appendChild(date);
+    info.appendChild(excerpt);
+    info.appendChild(meta);
+
+    const actionsCol = document.createElement("div");
+    actionsCol.className = "history-entry-actions";
+    const reloadBtn = document.createElement("button");
+    reloadBtn.type = "button";
+    reloadBtn.className = "btn small";
+    reloadBtn.textContent = "Recharger";
+    reloadBtn.addEventListener("click", () => restoreFromHistoryEntry(entry));
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.className = "btn small danger";
+    deleteBtn.textContent = "Supprimer";
+    deleteBtn.addEventListener("click", () => deleteHistoryEntry(entry.id));
+    actionsCol.appendChild(reloadBtn);
+    actionsCol.appendChild(deleteBtn);
+
+    row.appendChild(info);
+    row.appendChild(actionsCol);
+    historyBody.appendChild(row);
+  });
+}
+
+historyToggle.addEventListener("click", () => {
+  const open = historyBody.classList.toggle("open");
+  historyToggleIcon.textContent = open ? "▴" : "▾";
+});
+saveHistoryBtn.addEventListener("click", saveHistoryEntry);
+
+const debouncedAutoSave = debounce(() => {
+  if (textInput.value.trim().length > 20) saveHistoryEntry();
+}, 1200);
+
+// ===== Events =====
+textInput.addEventListener("input", (e) => {
+  const text = textInput.value;
+  const charCount = text.length;
+  const wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+  charWordCount.textContent = `${formatTokens(charCount)} caractère${charCount === 1 ? "" : "s"} · ${formatTokens(wordCount)} mot${wordCount === 1 ? "" : "s"}`;
+
+  if (!outputLengthTouched && !e.skipOutputAutofill) {
+    const referenceTokens = getTokenCount(text, "exact", 1);
+    outputLengthInput.value = referenceTokens;
+  }
+  updateAllCards();
+  if (!e.skipOutputAutofill) debouncedAutoSave();
+});
+
+outputLengthInput.addEventListener("input", () => {
+  outputLengthTouched = true;
+  updateAllCards();
+});
+
+const themeToggle = document.getElementById("theme-toggle");
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  themeToggle.textContent = theme === "dark" ? "🌙" : "☀️";
+  localStorage.setItem("tokencalc-theme", theme);
+}
+const savedTheme = localStorage.getItem("tokencalc-theme") || "dark";
+applyTheme(savedTheme);
+themeToggle.addEventListener("click", () => {
+  const current = document.documentElement.getAttribute("data-theme");
+  applyTheme(current === "dark" ? "light" : "dark");
+});
+
+// ===== Init =====
+async function init() {
+  await loadProvidersData();
+  resultsSection.innerHTML = "";
+  Object.entries(PROVIDERS).forEach(([key, provider]) => buildCard(key, provider));
+  await restoreFromHash();
+  updateAllCards();
+  renderHistoryPanel();
+}
+
+init();
+</script>
+</body>
+</html>
